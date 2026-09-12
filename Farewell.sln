@@ -8,6 +8,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Abstractions", "Fa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Debug.Tests", "Farewell.Debug.Tests\Farewell.Debug.Tests.csproj", "{79CEF1F4-B67E-4A49-8269-F5A493C93467}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Debug", "Farewell.Debug\Farewell.Debug.csproj", "{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -30,5 +32,9 @@ Global
 		{79CEF1F4-B67E-4A49-8269-F5A493C93467}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{79CEF1F4-B67E-4A49-8269-F5A493C93467}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{79CEF1F4-B67E-4A49-8269-F5A493C93467}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
