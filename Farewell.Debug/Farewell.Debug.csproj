@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Farewell.Abstractions\Farewell.Abstractions.csproj" />
+      <ProjectReference Include="..\Farewell.Application\Farewell.Application.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,42 +1,65 @@
 ﻿using System.Reflection;
 using Farewell.Abstractions.Attributes;
 using Farewell.Abstractions.Components;
+using Farewell.Abstractions.Domain;
+using Farewell.Abstractions.Infrastructure;
+using Farewell.Application;
+using Farewell.Application.CQRS;
 
 namespace Farewell.Debug
 {
-    [ServiceGroup(Tags = ["FeatureGroup1", "FeatureGroup2"])]
-    public class TestCommand : ICommand
+    public class TestDomainEntity : DomainEntity<uint>
     {
+        public string TestField1 { get; set; }
+        public string TestField2 { get; set; }
+        public string TestField3 { get; set; }
+    }
     
+    [CommandComponent]
+    public record TestCommand : CQRSCommand
+    {
+        public required string TestData1 { get; set; }
+        public required string TestData2 { get; set; }
+        public required string TestData3 { get; set; }
     }
 
-    [ServiceGroup(Tags = ["FeatureGroup1", "FeatureGroup3"])]
-    public class TestCommand3 : ICommand
+    [QueryComponent("TestGroup")]
+    public record TestQuery : CQRSQuery
     {
-        
-    }
-    
-    public class CommandImplementationTest : ICommand
-    {
-    
+        public required string TestData1 { get; set; }
+        public required string TestData2 { get; set; }
+        public required string TestData3 { get; set; }
     }
 
-    public class TestCommand2 : CommandImplementationTest
-    {
+    public record TestResponse(string TestField1, string TestField2) : IDTOComponent;
     
+    [HandlerComponent]
+    public class TestHandler : CQRSAsyncHandler<TestQuery, TestResponse>
+    {
+        public override async Task<CommandResult<TestResponse>> HandleAsync(TestQuery command, CancellationToken cancellationToken = default)
+        {
+            return new CommandResult<TestResponse>(100, "TestMessage", new TestResponse("test1", "test2"));
+        }
+    }
+
+    public interface ITestEntityRepository : IDomainRepository<TestDomainEntity, uint>
+    {
+    }
+
+    [RepositoryImplementationComponent]
+    public class TestEntityRepository : ITestEntityRepository
+    {
     }
 }
 
 namespace Farewell.Debug.Implementation.Tests
 {
-    public class TestCommand : ICommand
+    public record TestCommand : CQRSCommand
     {
-        
     }
-    
-    public class TestCommand4 : ICommand
+
+    public record TestCommand4 : CQRSCommand
     {
-        
     }
 }
 
@@ -89,31 +112,30 @@ public class Program
     public static Type[] GetServiceTypes<TServiceType>(string nameSpace = "")
     {
         var assembly = Assembly.GetExecutingAssembly();
-        
+
         var result = assembly.GetTypes()
-            .Where(t => typeof(TServiceType).IsAssignableFrom(t) 
-                        && t is { IsClass: true, IsAbstract: false } && (t.Namespace ?? "").StartsWith(nameSpace))
+            .Where(t => typeof(TServiceType).IsAssignableFrom(t)
+                        && t is { IsClass: true, IsAbstract: false } &&
+                        (t.Namespace ?? "").StartsWith(nameSpace))
             .ToArray(); // lookups every ICommand from selected lookupNamespace
 
         return result;
     }
 
-    public static string[] GetServiceGroups<TServiceType>()
+    public static string? GetServiceGroup<TServiceType>()
     {
         var groupsTotal = Assembly.GetExecutingAssembly().GetTypes()
             .Where(t => typeof(TServiceType).IsAssignableFrom(t))
-            .SelectMany(t => t.GetCustomAttribute<ServiceGroup>()?.Tags ?? [], (_, s) => s)
-            .Distinct()
-            .ToArray();
-        
+            .Select(t => t.GetCustomAttribute<CommandComponent>()?.Group)
+            .FirstOrDefault();
+
         return groupsTotal;
     }
 
-    public static Dictionary<string, List<Type>> GetServiceByGroups<TServiceType>(string nameSpace = "")
+    public static Dictionary<string, List<Type>> GetServiceByGroups<TServiceType>(
+        string nameSpace = "")
     {
         // var dictionary = new Dictionary<string, List<Type>>();
-
-
 
 
         // Assembly.GetExecutingAssembly().GetTypes()
@@ -122,32 +144,34 @@ public class Program
 
         return null;
     }
-    
+
     public static void Main(string[] args)
     {
-        var commandType = typeof(ICommand);
-        
+        var commandType = typeof(CQRSCommand);
+
         var assembly = Assembly.GetExecutingAssembly();
 
         var lookupNamespace = nameof(Farewell.Debug);
 
         var result = assembly.GetTypes()
-            .Where(t => commandType.IsAssignableFrom(t) 
-                        && t is { IsClass: true, IsAbstract: false } && t.Namespace.StartsWith(lookupNamespace))
+            .Where(t => commandType.IsAssignableFrom(t)
+                        && t is { IsClass: true, IsAbstract: false } &&
+                        t.Namespace.StartsWith(lookupNamespace))
             .ToArray(); // lookups every ICommand from selected lookupNamespace
-        
-        
+
+
         // Use StartsWith filter to get types from namespace
-        
+
         foreach (var command in result)
             Console.WriteLine(command.Name);
 
 
         Console.WriteLine("=============");
+
+        var allGroups = GetServiceGroup<CQRSCommand>();
         
-        var allGroups = GetServiceGroups<ICommand>();
-        
-        foreach (var command in allGroups)
-            Console.WriteLine(command);
+            Console.WriteLine(allGroups);
+
+        NullableField<string>? nullableField = new NullableField<string>(null);
     }
 }
