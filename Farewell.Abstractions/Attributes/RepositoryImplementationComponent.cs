@@ -1,7 +1,7 @@
 namespace Farewell.Abstractions.Attributes;
 
 [AttributeUsage(AttributeTargets.Class)]
-public class ServiceGroup() : Attribute
+public class RepositoryImplementationComponent : Attribute
 {
-    public string[] Tags {get; set;}
+    
 }

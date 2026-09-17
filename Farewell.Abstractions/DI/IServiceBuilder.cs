@@ -8,6 +8,6 @@ public interface IServiceBuilder
 
     public IServiceBuilder AddService(Type serviceType, Type implementationType,
         ServiceLifetimeType serviceLifetime, object? key = null);
-    
+
     public IScopeProvider Build();
 }

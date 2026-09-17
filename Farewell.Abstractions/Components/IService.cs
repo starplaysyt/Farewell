@@ -1,3 +1,5 @@
 namespace Farewell.Abstractions.Components;
 
-public interface IQuery { }
+public interface IService
+{
+}
