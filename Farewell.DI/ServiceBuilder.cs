@@ -8,11 +8,11 @@ public sealed class ServiceBuilder : IServiceBuilder
     private readonly List<ServiceDescriptor> _descriptors = new();
 
     internal IReadOnlyList<ServiceDescriptor> Descriptors => _descriptors;
-    
+
     public ServiceBuilder AddService(ServiceDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
-        
+
         _descriptors.Add(descriptor);
         return this;
     }
@@ -22,8 +22,9 @@ public sealed class ServiceBuilder : IServiceBuilder
     {
         ArgumentNullException.ThrowIfNull(serviceType);
         ArgumentNullException.ThrowIfNull(implementationType);
-        
-        _descriptors.Add(ServiceDescriptor.FromType(serviceType, implementationType, serviceLifetime, key));
+
+        _descriptors.Add(ServiceDescriptor.FromType(serviceType, implementationType,
+            serviceLifetime, key));
         return this;
     }
 
@@ -33,8 +34,9 @@ public sealed class ServiceBuilder : IServiceBuilder
     {
         ArgumentNullException.ThrowIfNull(serviceType);
         ArgumentNullException.ThrowIfNull(implementationFactory);
-        
-        _descriptors.Add(ServiceDescriptor.FromFactory(serviceType, implementationFactory, lifetime, key));
+
+        _descriptors.Add(
+            ServiceDescriptor.FromFactory(serviceType, implementationFactory, lifetime, key));
         return this;
     }
 
@@ -54,7 +56,7 @@ public sealed class ServiceBuilder : IServiceBuilder
 
         // Delegates for IEnumerable
         var enumerableFactories = EnumerableFactoriesBuilder.Build(compiled.Compiled);
-        
+
         // what's the dog doin'?
         return new ServiceProvider(
             compiled.Compiled,
@@ -104,8 +106,8 @@ public sealed class ServiceBuilder : IServiceBuilder
                         continue;
 
                     var genericDef = paramType.GetGenericTypeDefinition();
-                    var matchingOpen = openGeneric.FirstOrDefault(
-                        og => og.ServiceType == genericDef && Equals(og.Key, d.Key));
+                    var matchingOpen = openGeneric.FirstOrDefault(og =>
+                        og.ServiceType == genericDef && Equals(og.Key, d.Key));
 
                     if (matchingOpen?.ImplementationType is null)
                         continue;

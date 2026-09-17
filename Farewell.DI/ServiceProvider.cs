@@ -14,11 +14,15 @@ public sealed class ServiceProvider : IScopeProvider
 
     // Transient delegates
     private readonly Dictionary<Type, Func<IServiceProvider, object>> _transientFactories;
-    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>> _keyedTransientFactories;
+
+    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>>
+        _keyedTransientFactories;
 
     // Scoped delegates (only stored here)
     private readonly Dictionary<Type, Func<IServiceProvider, object>> _scopedFactories;
-    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>> _keyedScopedFactories;
+
+    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>>
+        _keyedScopedFactories;
 
     // Enumerable delegates
     private readonly Dictionary<Type, Func<IServiceProvider, object>> _enumerableFactories;
@@ -26,7 +30,7 @@ public sealed class ServiceProvider : IScopeProvider
     // Open generics (oh, fuck 'em)
     private readonly List<ServiceDescriptor> _openGenericDescriptors;
     private readonly ConcurrentDictionary<Type, CompiledService> _openGenericClosedCache = new();
-    
+
     private readonly Lock _lazySingletonLock = new();
     private int _nextSlotId;
 
@@ -78,9 +82,9 @@ public sealed class ServiceProvider : IScopeProvider
         foreach (var svc in singletonOrder)
         {
             var instance = svc.Factory(this);
-            
+
             _singletonBySlot[svc.SlotId] = instance;
-            
+
             if (svc.Key is null)
                 _singletonCache[svc.ServiceType] = instance;
             else
@@ -90,7 +94,7 @@ public sealed class ServiceProvider : IScopeProvider
                 _disposables.Add(disposable);
         }
     }
-    
+
     internal object ResolveFromCompiledService(CompiledService svc)
     {
         switch (svc.Lifetime)
@@ -124,7 +128,7 @@ public sealed class ServiceProvider : IScopeProvider
                 throw new InvalidOperationException();
         }
     }
-    
+
     public object? GetService(Type serviceType)
     {
         ThrowIfDisposed();
@@ -149,7 +153,7 @@ public sealed class ServiceProvider : IScopeProvider
         {
             if (_enumerableFactories.TryGetValue(serviceType, out var enumFactory))
                 return enumFactory(this);
-            
+
             var elementType = serviceType.GetGenericArguments()[0];
             return Array.CreateInstance(elementType, 0);
         }
@@ -188,7 +192,7 @@ public sealed class ServiceProvider : IScopeProvider
         ThrowIfDisposed();
         return new ServiceScope(this);
     }
-    
+
     internal CompiledService ResolveOpenGenericCompiled(Type closedType)
     {
         var svc = _openGenericClosedCache.GetOrAdd(closedType, type =>
@@ -284,12 +288,18 @@ public sealed class ServiceProvider : IScopeProvider
     {
         if (_disposed) return;
         _disposed = true;
-        
+
         // inverted order disposing
         for (int i = _disposables.Count - 1; i >= 0; i--)
         {
-            try { _disposables[i].Dispose(); }
-            catch { /* хрюкни и сглотни */ }
+            try
+            {
+                _disposables[i].Dispose();
+            }
+            catch
+            {
+                /* хрюкни и сглотни */
+            }
         }
 
         _disposables.Clear();

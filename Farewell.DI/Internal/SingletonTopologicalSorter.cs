@@ -13,7 +13,7 @@ internal static class SingletonTopologicalSorter
             .ToList();
 
         var sorted = new List<CompiledService>();
-        var visited = new HashSet<int>();   // ← по SlotId, не по (Type, Key)
+        var visited = new HashSet<int>(); // ← по SlotId, не по (Type, Key)
 
         foreach (var svc in singletons)
             TopoVisit(svc, compiled, visited, sorted);

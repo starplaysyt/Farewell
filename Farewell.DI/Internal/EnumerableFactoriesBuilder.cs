@@ -35,6 +35,7 @@ internal static class EnumerableFactoriesBuilder
                     };
                     typed.SetValue(instance, i);
                 }
+
                 return typed;
             };
         }

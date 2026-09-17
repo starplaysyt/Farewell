@@ -63,7 +63,8 @@ public sealed class ServiceDescriptor
     }
 
     // Validates compatibility between implementation and service
-    private static void ValidateImplementationCompatibility(Type serviceType, Type implementationType)
+    private static void ValidateImplementationCompatibility(Type serviceType,
+        Type implementationType)
     {
         if (serviceType.IsGenericTypeDefinition)
         {
@@ -71,12 +72,12 @@ public sealed class ServiceDescriptor
                 throw new ArgumentException(
                     $"Service type '{serviceType}' is an open generic, " +
                     $"but implementation '{implementationType}' is not.");
-            
+
             // There should be compatibility checks between two open-generics(service and impl),
             // but I'm tired, go fuck something with these generics
             return;
         }
-        
+
         if (!serviceType.IsAssignableFrom(implementationType))
             throw new ArgumentException(
                 $"Implementation type '{implementationType}' is not assignable " +

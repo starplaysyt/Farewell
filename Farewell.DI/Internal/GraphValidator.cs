@@ -61,7 +61,11 @@ internal static class GraphValidator
         HashSet<int> path)
     {
         if (!path.Add(current.SlotId)) return;
-        if (!checkedSet.Add(current.SlotId)) { path.Remove(current.SlotId); return; }
+        if (!checkedSet.Add(current.SlotId))
+        {
+            path.Remove(current.SlotId);
+            return;
+        }
 
         for (int i = 0; i < current.DependencyTypes.Length; i++)
         {

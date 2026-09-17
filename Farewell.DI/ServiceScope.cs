@@ -101,7 +101,7 @@ public sealed class ServiceScope : IKeyedServiceProvider
             return instance;
         }
 
-        if (_provider.HasKeyedTransientFactory(serviceType, key)) 
+        if (_provider.HasKeyedTransientFactory(serviceType, key))
         {
             var factory = _provider.GetKeyedTransientFactory(serviceType, key);
             var instance = factory(this);
@@ -153,8 +153,14 @@ public sealed class ServiceScope : IKeyedServiceProvider
 
         for (var i = _disposables.Count - 1; i >= 0; i--)
         {
-            try { _disposables[i].Dispose(); }
-            catch { /* хрюкни и сглотни */ }
+            try
+            {
+                _disposables[i].Dispose();
+            }
+            catch
+            {
+                /* хрюкни и сглотни */
+            }
         }
 
         _disposables.Clear();
