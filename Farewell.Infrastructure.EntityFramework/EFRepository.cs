@@ -14,133 +14,136 @@ public abstract class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQu
     
     public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(context);
     
+    public Task SaveChangesAsync(CancellationToken ct = default) => 
+        context.SaveChangesAsync(ct);
+
     public IQueryable<TEntity> GetQuery() => DbSet.AsNoTracking();
 
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken ct = default) =>
         (await DbSet.AddAsync(entity, ct)).Entity;
 
-    public async Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken ct = default) =>
-        await DbSet.AddRangeAsync(entities, ct);
+    public Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken ct = default) =>
+        DbSet.AddRangeAsync(entities, ct);
 
-    public async Task<bool> AllAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.AllAsync(predicate, ct);
+    public Task<bool> AllAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.AllAsync(predicate, ct);
 
-    public async Task<bool> AnyAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.AnyAsync(ct);
+    public Task<bool> AnyAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.AnyAsync(ct);
 
-    public async Task<bool> AnyAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.AnyAsync(predicate, ct);
+    public Task<bool> AnyAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.AnyAsync(predicate, ct);
 
-    public async Task<float?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, float?>> selector,
+    public Task<float?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, float?>> selector,
         CancellationToken ct = default) =>
-        await query.AverageAsync(selector, ct);
+        query.AverageAsync(selector, ct);
     
-    public async Task<double?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, double?>> selector,
+    public Task<double?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, double?>> selector,
         CancellationToken ct = default) =>
-        await query.AverageAsync(selector, ct);
+        query.AverageAsync(selector, ct);
     
-    public async Task<decimal?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, decimal?>> selector,
+    public Task<decimal?> AverageAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, decimal?>> selector,
         CancellationToken ct = default) =>
-        await query.AverageAsync(selector, ct);
+        query.AverageAsync(selector, ct);
 
-    public async Task<bool> ContainsAsync<TResult>(IQueryable<TResult> query, TResult item, CancellationToken ct = default) =>
-        await query.ContainsAsync(item, ct);
+    public Task<bool> ContainsAsync<TResult>(IQueryable<TResult> query, TResult item, CancellationToken ct = default) =>
+        query.ContainsAsync(item, ct);
 
-    public async Task<int> CountAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.CountAsync(ct);
+    public Task<int> CountAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.CountAsync(ct);
 
-    public async Task<int> CountAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.CountAsync(predicate, ct);
+    public Task<int> CountAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.CountAsync(predicate, ct);
 
-    public async Task<long> LongCountAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.LongCountAsync(ct);
+    public Task<long> LongCountAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.LongCountAsync(ct);
 
-    public async Task<long> LongCountAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
+    public Task<long> LongCountAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
         CancellationToken ct = default) =>
-        await query.LongCountAsync(predicate, ct);
+        query.LongCountAsync(predicate, ct);
 
-    public async Task<TMax> MaxAsync<TResult, TMax>(IQueryable<TResult> query, Expression<Func<TResult, TMax>> selector, CancellationToken ct = default) =>
-        await query.MaxAsync(selector, ct);
+    public Task<TMax> MaxAsync<TResult, TMax>(IQueryable<TResult> query, Expression<Func<TResult, TMax>> selector, CancellationToken ct = default) =>
+        query.MaxAsync(selector, ct);
 
-    public async Task<TMin> MinAsync<TResult, TMin>(IQueryable<TResult> query, Expression<Func<TResult, TMin>> selector, CancellationToken ct = default) =>
-        await query.MinAsync(selector, ct);
+    public Task<TMin> MinAsync<TResult, TMin>(IQueryable<TResult> query, Expression<Func<TResult, TMin>> selector, CancellationToken ct = default) =>
+        query.MinAsync(selector, ct);
 
-    public async Task<float?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, float?>> selector, CancellationToken ct = default) =>
-        await query.SumAsync(selector, ct);
+    public Task<float?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, float?>> selector, CancellationToken ct = default) =>
+        query.SumAsync(selector, ct);
     
-    public async Task<double?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, double?>> selector, CancellationToken ct = default) =>
-        await query.SumAsync(selector, ct);
+    public Task<double?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, double?>> selector, CancellationToken ct = default) =>
+        query.SumAsync(selector, ct);
     
-    public async Task<decimal?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, decimal?>> selector, CancellationToken ct = default) =>
-        await query.SumAsync(selector, ct);
+    public Task<decimal?> SumAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, decimal?>> selector, CancellationToken ct = default) => 
+        query.SumAsync(selector, ct);
 
-    public async Task<TResult> ElementAtAsync<TResult>(IQueryable<TResult> query, int index, CancellationToken ct = default) =>
-        await query.ElementAtAsync(index, ct);
+    public Task<TResult> ElementAtAsync<TResult>(IQueryable<TResult> query, int index, CancellationToken ct = default) =>
+        query.ElementAtAsync(index, ct);
 
-    public async Task<TResult?> ElementAtOrDefaultAsync<TResult>(IQueryable<TResult> query, int index, CancellationToken ct = default) =>
-        await query.ElementAtOrDefaultAsync(index, ct);
+    public Task<TResult?> ElementAtOrDefaultAsync<TResult>(IQueryable<TResult> query, int index, CancellationToken ct = default) =>
+        query.ElementAtOrDefaultAsync(index, ct);
 
-    public async Task<TResult> FirstAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.FirstAsync(ct);
+    public Task<TResult> FirstAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.FirstAsync(ct);
 
-    public async Task<TResult> FirstAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.FirstAsync(predicate, ct);
+    public Task<TResult> FirstAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.FirstAsync(predicate, ct);
 
-    public async Task<TResult?> FirstOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.FirstOrDefaultAsync(ct);
+    public Task<TResult?> FirstOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.FirstOrDefaultAsync(ct);
 
-    public async Task<TResult?> FirstOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
+    public Task<TResult?> FirstOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
         CancellationToken ct = default) =>
-        await query.FirstOrDefaultAsync(predicate, ct);
+        query.FirstOrDefaultAsync(predicate, ct);
 
-    public async Task<TResult> LastAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.LastAsync(ct);
+    public Task<TResult> LastAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.LastAsync(ct);
 
-    public async Task<TResult> LastAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.LastAsync(predicate, ct);
+    public Task<TResult> LastAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.LastAsync(predicate, ct);
 
-    public async Task<TResult?> LastOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.LastOrDefaultAsync(ct);
+    public Task<TResult?> LastOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.LastOrDefaultAsync(ct);
 
-    public async Task<TResult?> LastOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
+    public Task<TResult?> LastOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
         CancellationToken ct = default) =>
-        await query.LastOrDefaultAsync(predicate, ct);
+        query.LastOrDefaultAsync(predicate, ct);
 
-    public async Task<TResult> SingleAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.SingleAsync(ct);
+    public Task<TResult> SingleAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.SingleAsync(ct);
 
-    public async Task<TResult> SingleAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
-        await query.SingleAsync(predicate, ct);
+    public Task<TResult> SingleAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate, CancellationToken ct = default) =>
+        query.SingleAsync(predicate, ct);
 
-    public async Task<TResult?> SingleOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.SingleOrDefaultAsync(ct);
+    public Task<TResult?> SingleOrDefaultAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.SingleOrDefaultAsync(ct);
 
-    public async Task<TResult?> SingleOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
+    public Task<TResult?> SingleOrDefaultAsync<TResult>(IQueryable<TResult> query, Expression<Func<TResult, bool>> predicate,
         CancellationToken ct = default) =>
-        await query.SingleOrDefaultAsync(predicate, ct);
+        query.SingleOrDefaultAsync(predicate, ct);
 
-    public async Task ForEachAsync<TResult>(IQueryable<TResult> query, Action<TResult> action, CancellationToken ct = default) =>
-        await query.ForEachAsync(action, ct);
+    public Task ForEachAsync<TResult>(IQueryable<TResult> query, Action<TResult> action, CancellationToken ct = default) =>
+        query.ForEachAsync(action, ct);
 
-    public async Task<int> ExecuteDeleteAsync(IQueryable<TEntity> query,
+    public Task<int> ExecuteDeleteAsync(IQueryable<TEntity> query,
         CancellationToken ct = default) =>
-        await query.ExecuteDeleteAsync(ct);
+        query.ExecuteDeleteAsync(ct);
 
     public async Task<int> ExecuteUpdateAsync<TUpdateMap>(IQueryable<TEntity> query,
         TUpdateMap updateMap,
-        CancellationToken ct = default) =>
+        CancellationToken ct = default) => 
         await query.ExecuteUpdateAsync(UpdateSetterGenerator<TEntity, TUniqueKey, TUpdateMap>.Compiled.Invoke(updateMap), ct);
 
-    public async Task<TResult[]> ToArrayAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.ToArrayAsync(ct);
+    public Task<TResult[]> ToArrayAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.ToArrayAsync(ct);
 
-    public async Task<Dictionary<TKey, TResult>> ToDictionaryAsync<TResult, TKey>(IQueryable<TResult> query, Func<TResult, TKey> keySelector,
+    public Task<Dictionary<TKey, TResult>> ToDictionaryAsync<TResult, TKey>(IQueryable<TResult> query, Func<TResult, TKey> keySelector,
         CancellationToken ct = default) where TKey : notnull =>
-        await query.ToDictionaryAsync(keySelector, ct);
+        query.ToDictionaryAsync(keySelector, ct);
 
-    public async Task<HashSet<TResult>> ToHashSetAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.ToHashSetAsync(ct);
+    public Task<HashSet<TResult>> ToHashSetAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.ToHashSetAsync(ct);
 
-    public async Task<List<TResult>> ToListAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
-        await query.ToListAsync(ct);
+    public Task<List<TResult>> ToListAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
+        query.ToListAsync(ct);
 }

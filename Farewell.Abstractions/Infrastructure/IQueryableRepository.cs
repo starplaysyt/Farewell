@@ -15,6 +15,8 @@ public interface IQueryableRepository<TEntity, TUniqueKey>
     // AsSplitQuery - useless without Include - no Include, no need in AsSplitQuery
 
     public IUnitOfWork GetUnitOfWork();
+    
+    public Task SaveChangesAsync(CancellationToken ct = default);
 
     Task<TEntity> AddAsync(TEntity entity,
         CancellationToken ct = default);
