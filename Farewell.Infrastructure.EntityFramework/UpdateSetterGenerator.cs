@@ -3,7 +3,7 @@ using System.Reflection;
 using Farewell.Abstractions.Domain;
 using Microsoft.EntityFrameworkCore.Query;
 
-namespace Farewell.EF;
+namespace Farewell.Infrastructure;
 
 public static class UpdateSetterGenerator<TEntity, TKey, TUpdateMap>
     where TEntity : DomainEntity<TKey>

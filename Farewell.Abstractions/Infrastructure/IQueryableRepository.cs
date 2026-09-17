@@ -3,20 +3,18 @@ using Farewell.Abstractions.Domain;
 
 namespace Farewell.Abstractions.Infrastructure;
 
-public interface IORMRepository<TEntity, TUniqueKey> : IDomainRepository<TEntity, TUniqueKey>
+public interface IQueryableRepository<TEntity, TUniqueKey>
     where TEntity : DomainEntity<TUniqueKey>
     where TUniqueKey : IComparable<TUniqueKey>
 {
     IQueryable<TEntity> GetQuery();
+    
+    // FromSqlRawAsync - unsupported, architecture limitations
+    // Bulk update with different update maps - unsupported by EntityFramework -
+    // maybe extension in future
+    // AsSplitQuery - useless without Include - no Include, no need in AsSplitQuery
 
-    //TODO: Move that to UnitOfWork
-    Task<int> SaveChangesAsync(CancellationToken ct = default);
-
-    Task<ITransactionInfo> BeginTransactionAsync(CancellationToken ct = default);
-
-    Task CommitTransactionAsync(ITransactionInfo info, CancellationToken ct = default);
-
-    Task RollbackTransactionAsync(ITransactionInfo info, CancellationToken ct = default);
+    public IUnitOfWork GetUnitOfWork();
 
     Task<TEntity> AddAsync(TEntity entity,
         CancellationToken ct = default);

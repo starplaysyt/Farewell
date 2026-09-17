@@ -1,12 +1,11 @@
-using System.Data.Common;
 using Farewell.Abstractions.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Farewell.EF;
+namespace Farewell.Infrastructure;
 
-internal class TransactionInfo : ITransactionInfo, IAsyncDisposable
+internal class EFTransactionInfo : ITransactionInfo, IAsyncDisposable
 {
-    public IDbContextTransaction DbTransaction { get; set; }
+    public required IDbContextTransaction DbTransaction { get; set; }
 
     public void Dispose()
     {

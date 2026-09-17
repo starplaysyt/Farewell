@@ -2,7 +2,6 @@
 using Farewell.Abstractions.Attributes;
 using Farewell.Abstractions.Components;
 using Farewell.Abstractions.Domain;
-using Farewell.Abstractions.Infrastructure;
 using Farewell.Application;
 using Farewell.Application.CQRS;
 
@@ -40,15 +39,6 @@ namespace Farewell.Debug
         {
             return new CommandResult<TestResponse>(100, "TestMessage", new TestResponse("test1", "test2"));
         }
-    }
-
-    public interface ITestEntityRepository : IDomainRepository<TestDomainEntity, uint>
-    {
-    }
-
-    [RepositoryImplementationComponent]
-    public class TestEntityRepository : ITestEntityRepository
-    {
     }
 }
 
@@ -164,7 +154,7 @@ public class Program
 
         foreach (var command in result)
             Console.WriteLine(command.Name);
-
+        
 
         Console.WriteLine("=============");
 

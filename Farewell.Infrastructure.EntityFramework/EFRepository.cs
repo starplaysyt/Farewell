@@ -1,46 +1,18 @@
 ﻿using System.Linq.Expressions;
 using Farewell.Abstractions.Domain;
 using Farewell.Abstractions.Infrastructure;
-using Farewell.EF;
 using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Infrastructure;
 
-public abstract class ORMRepository<TEntity, TUniqueKey>(DbContext context) : IORMRepository<TEntity, TUniqueKey>
+public abstract class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQueryableRepository<TEntity, TUniqueKey>
     where TEntity : DomainEntity<TUniqueKey>
     where TUniqueKey : IComparable<TUniqueKey>
 {
+    public virtual DbContext Context => context;
     public virtual DbSet<TEntity> DbSet { get; } = context.Set<TEntity>();
-
-    public async Task<int> SaveChangesAsync(CancellationToken ct = default) =>
-        await context.SaveChangesAsync(ct);
-
-    public async Task<ITransactionInfo> BeginTransactionAsync(CancellationToken ct = default) =>
-        new TransactionInfo {  DbTransaction = await context.Database.BeginTransactionAsync(ct) };
-
-    public async Task CommitTransactionAsync(ITransactionInfo info, CancellationToken ct = default)
-    {
-        if (info is not TransactionInfo transactionInfo)
-            throw new InvalidOperationException("Invalid transaction info");
-        if (transactionInfo.DbTransaction is null)
-            throw new InvalidOperationException("This transaction has been already committed/rollbacked");
-        
-        await transactionInfo.DbTransaction.CommitAsync(ct);
-        await transactionInfo.DisposeAsync();
-        transactionInfo.DbTransaction = null!;
-    }
-
-    public async Task RollbackTransactionAsync(ITransactionInfo info, CancellationToken ct = default)
-    {
-        if (info is not TransactionInfo transactionInfo)
-            throw new InvalidOperationException("Invalid transaction info");
-        if (transactionInfo.DbTransaction is null)
-            throw new InvalidOperationException("This transaction has been already committed/rollbacked");
-        
-        await transactionInfo.DbTransaction.RollbackAsync(ct);
-        await transactionInfo.DisposeAsync();
-        transactionInfo.DbTransaction = null!;
-    }
+    
+    public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(context);
     
     public IQueryable<TEntity> GetQuery() => DbSet.AsNoTracking();
 
