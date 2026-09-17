@@ -68,7 +68,6 @@ public class ExtensionsTests
     public void GetKeyedService_NullKey_Throws()
     {
         var provider = new ServiceBuilder().Build();
-        Assert.Throws<ArgumentNullException>(
-            () => provider.GetKeyedService<ICache>(null!));
+        Assert.Throws<ArgumentNullException>(() => provider.GetKeyedService<ICache>(null!));
     }
 }

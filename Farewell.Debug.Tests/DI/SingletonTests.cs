@@ -35,9 +35,13 @@ public class SingletonTests
     {
         var creationCount = 0;
         var provider = new ServiceBuilder()
-            .AddSingleton<IServiceA>(_ => { creationCount++; return new ServiceA(); })
+            .AddSingleton<IServiceA>(_ =>
+            {
+                creationCount++;
+                return new ServiceA();
+            })
             .Build();
-        
+
         Assert.Equal(1, creationCount);
 
         provider.GetService<IServiceA>();

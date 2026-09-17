@@ -36,7 +36,7 @@ public class KeyedTests
         var provider = new ServiceBuilder()
             .AddKeyedSingleton<ICache, MemoryCache>("fast")
             .Build();
-        
+
         var result = provider.GetService<ICache>();
         Assert.Null(result);
     }
@@ -96,7 +96,7 @@ public class KeyedTests
     public void GetRequiredKeyedService_NotRegistered_Throws()
     {
         var provider = new ServiceBuilder().Build();
-        Assert.Throws<InvalidOperationException>(
-            () => provider.GetRequiredKeyedService<ICache>("any"));
+        Assert.Throws<InvalidOperationException>(() =>
+            provider.GetRequiredKeyedService<ICache>("any"));
     }
 }

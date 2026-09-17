@@ -72,7 +72,7 @@ public class OpenGenericTests
         var r2 = scope.GetService<IRepository<User>>();
         Assert.Same(r1, r2);
     }
-    
+
     [Fact]
     public void OpenGeneric_Singleton_SameInstanceAcrossCalls()
     {

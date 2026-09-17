@@ -38,10 +38,12 @@ public class IntegrationTests
             scoped1 = scope1.GetService<IServiceB>()!;
             Assert.Same(scoped1, scope1.GetService<IServiceB>());
         }
+
         using (var scope2 = provider.CreateScope())
         {
             scoped2 = scope2.GetService<IServiceB>()!;
         }
+
         Assert.NotSame(scoped1, scoped2);
 
         var trans1 = provider.GetService<IServiceC>();

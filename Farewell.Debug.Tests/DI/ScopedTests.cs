@@ -55,6 +55,7 @@ public class ScopedTests
             svc = scope.GetService<DisposableService>()!;
             Assert.False(svc.IsDisposed);
         }
+
         Assert.True(svc.IsDisposed);
     }
 

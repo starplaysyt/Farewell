@@ -43,6 +43,7 @@ public class TransientTests
         {
             svc = scope.GetService<DisposableService>()!;
         }
+
         Assert.True(svc.IsDisposed);
     }
 
