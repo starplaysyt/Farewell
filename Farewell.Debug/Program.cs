@@ -2,8 +2,11 @@
 using Farewell.Abstractions.Attributes;
 using Farewell.Abstractions.Components;
 using Farewell.Abstractions.Domain;
+using Farewell.Abstractions.Presentation;
 using Farewell.Application;
 using Farewell.Application.CQRS;
+using Farewell.DI;
+using Farewell.Presentation;
 
 namespace Farewell.Debug
 {
@@ -137,31 +140,41 @@ public class Program
 
     public static void Main(string[] args)
     {
-        var commandType = typeof(CQRSCommand);
+        var builder = new ConfigurationBuilder();
+        builder.AddServiceScope("Farewell.Abstractions");
 
-        var assembly = Assembly.GetExecutingAssembly();
+        var assembly = Assembly.GetCallingAssembly();
+        foreach (var type in assembly.GetTypes())
+        {
+            Console.WriteLine($"EXECASM: {type.Name}");
+        }
 
-        var lookupNamespace = nameof(Farewell.Debug);
-
-        var result = assembly.GetTypes()
-            .Where(t => commandType.IsAssignableFrom(t)
-                        && t is { IsClass: true, IsAbstract: false } &&
-                        t.Namespace.StartsWith(lookupNamespace))
-            .ToArray(); // lookups every ICommand from selected lookupNamespace
-
-
-        // Use StartsWith filter to get types from namespace
-
-        foreach (var command in result)
-            Console.WriteLine(command.Name);
-        
-
-        Console.WriteLine("=============");
-
-        var allGroups = GetServiceGroup<CQRSCommand>();
-        
-            Console.WriteLine(allGroups);
-
-        NullableField<string>? nullableField = new NullableField<string>(null);
+        // var commandType = typeof(CQRSCommand);
+        //
+        // var assembly = Assembly.GetExecutingAssembly();
+        //
+        // var lookupNamespace = nameof(Farewell.Debug);
+        //
+        // var result = assembly.GetTypes()
+        //     .Where(t => commandType.IsAssignableFrom(t)
+        //                 && t is { IsClass: true, IsAbstract: false } &&
+        //                 t.Namespace.StartsWith(lookupNamespace))
+        //     .ToArray(); // lookups every ICommand from selected lookupNamespace
+        //
+        //
+        // // Use StartsWith filter to get types from namespace
+        //
+        // foreach (var command in result)
+        //     Console.WriteLine(command.Name);
+        //
+        //
+        // Console.WriteLine("=============");
+        //
+        // var allGroups = GetServiceGroup<CQRSCommand>();
+        //
+        // Console.WriteLine(allGroups);
+        //
+        // var builder = new ConfigurationBuilder();
+        // builder.AddServiceBuilder<ServiceBuilder>();
     }
 }
