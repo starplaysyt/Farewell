@@ -10,6 +10,7 @@ using Farewell.Debug.TestApplicationInterfaces;
 using Farewell.Debug.TestEntities;
 using Farewell.Debug.TestInfrastructureRepositories;
 using Farewell.DI;
+using Farewell.Infrastructure.Extensions;
 using Farewell.Presentation;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
@@ -146,7 +147,10 @@ public class Program
 
     public static void Main(string[] args)
     {
-        var testDbContext = new TestDbContext(new DbContextOptionsBuilder().UseSqlite("Data Source=test.db"));
+        var testDbContext = new TestDbContext(new DbContextOptionsBuilder()
+            .UseSqlite("Data Source=test.db")
+            .UseDomainConventions()
+            );
 
         if (testDbContext.Database.EnsureCreated())
         {
@@ -157,7 +161,7 @@ public class Program
                 entities.Add(new TestAEntity()
                 {
                     TestNotNullableField = Guid.NewGuid().ToString(),
-                    TestKey = "uniqueString",
+                    TestKey = Guid.NewGuid().ToString(),
                     TestNotUpdatableField = Guid.NewGuid().ToString(),
                     TestNullableField = new Random().Next(),
                     TestStringNullableField = Guid.NewGuid().ToString()

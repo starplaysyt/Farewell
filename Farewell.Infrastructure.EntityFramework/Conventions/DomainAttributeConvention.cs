@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 
-namespace Farewell.Infrastructure;
+namespace Farewell.Infrastructure.Conventions;
 
 public sealed class DomainAttributeConvention : IModelFinalizingConvention
 {
