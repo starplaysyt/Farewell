@@ -131,8 +131,13 @@ public abstract class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQu
 
     public async Task<int> ExecuteUpdateAsync<TUpdateMap>(IQueryable<TEntity> query,
         TUpdateMap updateMap,
-        CancellationToken ct = default) => 
-        await query.ExecuteUpdateAsync(UpdateSetterGenerator<TEntity, TUniqueKey, TUpdateMap>.Compiled.Invoke(updateMap), ct);
+        CancellationToken ct = default)
+    {
+        var result = 0;
+        if (UpdateMapHasChangesChecker<TUpdateMap>.Compiled.Invoke(updateMap))
+            result = await query.ExecuteUpdateAsync(UpdateSetterGenerator<TEntity, TUniqueKey, TUpdateMap>.Compiled.Invoke(updateMap), ct);
+        return result;
+    }
 
     public Task<TResult[]> ToArrayAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default) =>
         query.ToArrayAsync(ct);

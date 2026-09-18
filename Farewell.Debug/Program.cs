@@ -5,8 +5,14 @@ using Farewell.Abstractions.Domain;
 using Farewell.Abstractions.Presentation;
 using Farewell.Application;
 using Farewell.Application.CQRS;
+using Farewell.Debug;
+using Farewell.Debug.TestApplicationInterfaces;
+using Farewell.Debug.TestEntities;
+using Farewell.Debug.TestInfrastructureRepositories;
 using Farewell.DI;
 using Farewell.Presentation;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 
 namespace Farewell.Debug
 {
@@ -140,14 +146,41 @@ public class Program
 
     public static void Main(string[] args)
     {
-        var builder = new ConfigurationBuilder();
-        builder.AddServiceScope("Farewell.Abstractions");
+        var testDbContext = new TestDbContext(new DbContextOptionsBuilder().UseSqlite("Data Source=test.db"));
 
-        var assembly = Assembly.GetCallingAssembly();
-        foreach (var type in assembly.GetTypes())
+        if (testDbContext.Database.EnsureCreated())
         {
-            Console.WriteLine($"EXECASM: {type.Name}");
+            List<TestAEntity> entities = new List<TestAEntity>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                entities.Add(new TestAEntity()
+                {
+                    TestNotNullableField = Guid.NewGuid().ToString(),
+                    TestKey = "uniqueString",
+                    TestNotUpdatableField = Guid.NewGuid().ToString(),
+                    TestNullableField = new Random().Next(),
+                    TestStringNullableField = Guid.NewGuid().ToString()
+                });
+            }
+            
+            testDbContext.TestAEntities.AddRange(entities);
+            testDbContext.SaveChanges();
         }
+
+        ITestAEntityRepository repo = new TestAEntityRepository(testDbContext);
+
+        // repo.ExecuteUpdateAsync(repo.GetQuery().Where(e => e.Id % 2 == 0),
+        //     new TestAEntityUpdateMap(null, new NullableField<int?>(null),
+        //         new NullableField<string?>(null), null)).Wait();
+        
+        repo.ExecuteUpdateAsync(repo.GetQuery().Where(e => e.Id == 26),
+            new TestAEntityUpdateMap(null, 10,
+                null, null)).Wait();
+
+        repo.SaveChangesAsync().Wait();
+        
+        testDbContext.Dispose();
 
         // var commandType = typeof(CQRSCommand);
         //
