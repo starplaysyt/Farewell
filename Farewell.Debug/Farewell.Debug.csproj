@@ -15,4 +15,8 @@
       <ProjectReference Include="..\Farewell.Presentation\Farewell.Presentation.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
+    </ItemGroup>
+
 </Project>

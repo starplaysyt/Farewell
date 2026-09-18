@@ -1,7 +1,9 @@
+using System.Runtime.CompilerServices;
+
 namespace Farewell.Abstractions.Domain;
 
-public struct NullableField<T>(T? value) where T : notnull
+public readonly struct NullableField<T>(T? value)
 {
-    public T? Value { get; set; } = value;
+    public readonly T? Value = value;
     public static implicit operator NullableField<T>(T? value) => new(value);
 }
