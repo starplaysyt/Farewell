@@ -17,8 +17,9 @@ public sealed class DomainAttributeConvention : IModelFinalizingConvention
 
         foreach (var entityType in model.GetEntityTypes())
         {
-            ApplyIdentity(entityType);
-            ApplyOnDelete(entityType);
+            //ApplyIdentity(entityType);
+            //ApplyOnDelete(entityType);
+            //ApplySequence(entityType);
             ApplyInheritance(entityType);
         }
     }
@@ -98,12 +99,12 @@ public sealed class DomainAttributeConvention : IModelFinalizingConvention
 
     private static void ApplyInheritance(IMutableEntityType entityType)
     {
-        var clrType = entityType.ClrType;
-
-        var attr = clrType.GetCustomAttribute<InheritanceAttribute>(inherit: false);
+        var attr = entityType.ClrType.GetCustomAttribute<InheritanceAttribute>(inherit: false);
         if (attr is null) return;
 
         var root = entityType.GetRootType();
+        
+        entityType.SetDiscriminatorProperty(null);
 
         var strategyString = attr.Strategy switch
         {
@@ -114,5 +115,36 @@ public sealed class DomainAttributeConvention : IModelFinalizingConvention
         };
 
         root.SetAnnotation("Relational:MappingStrategy", strategyString);
+    }
+    
+    public static void ApplySequence(IMutableEntityType entityType)
+    {
+        if (entityType.ClrType is null) return;
+
+        foreach (var property in entityType.GetProperties())
+        {
+            var member = (MemberInfo?)property.PropertyInfo ?? property.FieldInfo;
+
+            var attr = member?.GetCustomAttribute<SequenceAttribute>();
+            if (attr is null) continue;
+            
+            property.ValueGenerated = ValueGenerated.OnAdd;
+            
+            var model = entityType.Model;
+            
+            var sequence = model.FindSequence(attr.Name, attr.Schema)
+                           ?? model.AddSequence(attr.Name, attr.Schema);
+
+            sequence.StartValue = attr.StartValue;
+            sequence.IncrementBy = attr.Increment;
+            
+            property.SetAnnotation("SqlServer:ValueGenerationStrategy", 2); 
+            property.SetAnnotation("SqlServer:HiLoSequenceName", attr.Name);
+            
+            if (attr.Schema is not null)
+                property.SetAnnotation("SqlServer:HiLoSequenceSchema", attr.Schema);
+            else
+                property.RemoveAnnotation("SqlServer:HiLoSequenceSchema");
+        }
     }
 }

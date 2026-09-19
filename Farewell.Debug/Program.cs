@@ -167,8 +167,47 @@ public class Program
                     TestStringNullableField = Guid.NewGuid().ToString()
                 });
             }
+
+            List<TestBEntity> bEntities = new List<TestBEntity>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                bEntities.Add(new TestBEntity()
+                {
+                    FieldB1 = Guid.NewGuid().ToString(),
+                    FieldB2 = Guid.NewGuid().ToString(),
+                    FieldB3 = Guid.NewGuid().ToString(),
+                    FieldC1 = Guid.NewGuid().ToString(),
+                    FieldC2 = Guid.NewGuid().ToString(),
+                    FieldC3 = Guid.NewGuid().ToString(),
+                });        
+            }
             
-            testDbContext.TestAEntities.AddRange(entities);
+            List<TestDEntity> dEntities = new List<TestDEntity>();
+
+            for (int i = 0; i < 100; i++)
+            {
+                dEntities.Add(new TestDEntity
+                {
+                    FieldD1 = Guid.NewGuid()
+                        .ToString(),
+                    FieldD2 = Guid.NewGuid()
+                        .ToString(),
+                    FieldD3 = Guid.NewGuid()
+                        .ToString(),
+                    FieldC1 = Guid.NewGuid()
+                        .ToString(),
+                    FieldC2 = Guid.NewGuid()
+                        .ToString(),
+                    FieldC3 = Guid.NewGuid()
+                        .ToString(),
+                });        
+            }
+            
+            testDbContext.TestBEntities.AddRange(bEntities);
+            testDbContext.SaveChanges();
+            
+            testDbContext.TestDEntities.AddRange(dEntities);
             testDbContext.SaveChanges();
         }
 
