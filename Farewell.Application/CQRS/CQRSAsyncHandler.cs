@@ -6,6 +6,13 @@ public abstract class CQRSAsyncHandler<TRequest, TResult> : IService
     where TRequest : IDTOComponent
     where TResult : IDTOComponent
 {
-    public abstract Task<CommandResult<TResult>> HandleAsync(TRequest command,
+    public abstract Task<OperationResult<TResult>> HandleAsync(TRequest command,
+        CancellationToken cancellationToken = default);
+}
+
+public abstract class CQRSAsyncHandler<TRequest> : IService
+    where TRequest : IDTOComponent
+{
+    public abstract Task<OperationResult> HandleAsync(TRequest command,
         CancellationToken cancellationToken = default);
 }

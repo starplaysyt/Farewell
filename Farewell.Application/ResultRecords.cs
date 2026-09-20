@@ -1,8 +1,8 @@
 namespace Farewell.Application;
 
-public record CommandResult<T>(int Code, string Message, T? Result);
+public record OperationResult<T>(int Code, string Message, T? Result);
 
-public record CommandResult(int Code, string Message);
+public record OperationResult(int Code, string Message);
 
 public record QueryResult<T>(int Code, string Message, T? Result);
 
