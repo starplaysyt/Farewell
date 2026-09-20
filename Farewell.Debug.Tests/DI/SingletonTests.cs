@@ -1,4 +1,5 @@
-﻿using Farewell.DI;
+﻿using Farewell.Abstractions.DI;
+using Farewell.DI;
 
 namespace Farewell.Debug.Tests.DI;
 
