@@ -11,14 +11,11 @@ public class TestDbContext(DbContextOptionsBuilder builder) : DbContext(builder.
         ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Conventions
-            .Add(_ => new DomainAttributeConvention());
+            .Add(_ => new DomainIdentityConvention());
     }
     
     public DbSet<TestAEntity> TestAEntities { get; set; }
-    
     public DbSet<TestBEntity> TestBEntities { get; set; }
-    
     public DbSet<TestCEntity> TestCEntities { get; set; }
-
     public DbSet<TestDEntity> TestDEntities { get; set; }
 }

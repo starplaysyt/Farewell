@@ -161,7 +161,7 @@ public class Program
                 entities.Add(new TestAEntity()
                 {
                     TestNotNullableField = Guid.NewGuid().ToString(),
-                    TestKey = Guid.NewGuid().ToString(),
+                    TestKey = "TestValue",
                     TestNotUpdatableField = Guid.NewGuid().ToString(),
                     TestNullableField = new Random().Next(),
                     TestStringNullableField = Guid.NewGuid().ToString()
@@ -203,6 +203,9 @@ public class Program
                         .ToString(),
                 });        
             }
+            
+            testDbContext.TestAEntities.AddRange(entities);
+            testDbContext.SaveChanges();
             
             testDbContext.TestBEntities.AddRange(bEntities);
             testDbContext.SaveChanges();

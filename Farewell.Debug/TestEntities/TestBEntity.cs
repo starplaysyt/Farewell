@@ -10,7 +10,6 @@ public class TestBEntity : TestCEntity
     public required string FieldB3 { get; set; }
 }
 
-[Inheritance(InheritanceStrategy.Tpc)]
 public class TestCEntity : DomainEntity<uint>
 {
     public required string FieldC1 { get; set; }

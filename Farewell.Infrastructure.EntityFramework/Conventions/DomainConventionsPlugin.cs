@@ -8,7 +8,7 @@ public sealed class DomainConventionsPlugin : IConventionSetPlugin
     public ConventionSet ModifyConventions(ConventionSet conventionSet)
     {
         conventionSet.ModelFinalizingConventions
-            .Add(new DomainAttributeConvention());
+            .Add(new DomainIdentityConvention());
 
         return conventionSet;
     }

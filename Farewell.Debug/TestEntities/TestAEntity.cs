@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Farewell.Abstractions.Attributes.Domain;
 using Farewell.Abstractions.Domain;
 
 namespace Farewell.Debug.TestEntities;
@@ -8,7 +7,7 @@ namespace Farewell.Debug.TestEntities;
 [Table("test_a_entities")]
 public class TestAEntity : DomainEntity<uint>
 {
-    [Identity, Column("test_key"), MaxLength(32)]
+    [Key, Column("test_key"), MaxLength(32)]
     public required string TestKey { get; set; }
 
     [Column("test_nullable_field")]
