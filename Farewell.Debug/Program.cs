@@ -1,68 +1,9 @@
-﻿using System.Reflection;
-using Farewell.Abstractions.Attributes;
-using Farewell.Abstractions.Components;
-using Farewell.Abstractions.Domain;
-using Farewell.Abstractions.Presentation;
-using Farewell.Application;
-using Farewell.Application.CQRS;
-using Farewell.Debug;
+﻿using Farewell.Debug;
 using Farewell.Debug.TestApplicationInterfaces;
 using Farewell.Debug.TestEntities;
 using Farewell.Debug.TestInfrastructureRepositories;
-using Farewell.DI;
 using Farewell.Infrastructure.Extensions;
-using Farewell.Presentation;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
-
-namespace Farewell.Debug
-{
-    public class TestDomainEntity : DomainEntity<uint>
-    {
-        public string TestField1 { get; set; }
-        public string TestField2 { get; set; }
-        public string TestField3 { get; set; }
-    }
-    
-    [CommandComponent]
-    public record TestCommand : CQRSCommand
-    {
-        public required string TestData1 { get; set; }
-        public required string TestData2 { get; set; }
-        public required string TestData3 { get; set; }
-    }
-
-    [QueryComponent("TestGroup")]
-    public record TestQuery : CQRSQuery
-    {
-        public required string TestData1 { get; set; }
-        public required string TestData2 { get; set; }
-        public required string TestData3 { get; set; }
-    }
-
-    public record TestResponse(string TestField1, string TestField2) : IDTOComponent;
-    
-    [HandlerComponent]
-    public class TestHandler : CQRSAsyncHandler<TestQuery, TestResponse>
-    {
-        public override async Task<CommandResult<TestResponse>> HandleAsync(TestQuery command, CancellationToken cancellationToken = default)
-        {
-            return new CommandResult<TestResponse>(100, "TestMessage", new TestResponse("test1", "test2"));
-        }
-    }
-}
-
-namespace Farewell.Debug.Implementation.Tests
-{
-    public record TestCommand : CQRSCommand
-    {
-    }
-
-    public record TestCommand4 : CQRSCommand
-    {
-    }
-}
-
 
 // var builder = new FarewellBuilder();
 //
@@ -109,42 +50,6 @@ namespace Farewell.Debug.Implementation.Tests
 
 public class Program
 {
-    public static Type[] GetServiceTypes<TServiceType>(string nameSpace = "")
-    {
-        var assembly = Assembly.GetExecutingAssembly();
-
-        var result = assembly.GetTypes()
-            .Where(t => typeof(TServiceType).IsAssignableFrom(t)
-                        && t is { IsClass: true, IsAbstract: false } &&
-                        (t.Namespace ?? "").StartsWith(nameSpace))
-            .ToArray(); // lookups every ICommand from selected lookupNamespace
-
-        return result;
-    }
-
-    public static string? GetServiceGroup<TServiceType>()
-    {
-        var groupsTotal = Assembly.GetExecutingAssembly().GetTypes()
-            .Where(t => typeof(TServiceType).IsAssignableFrom(t))
-            .Select(t => t.GetCustomAttribute<CommandComponent>()?.Group)
-            .FirstOrDefault();
-
-        return groupsTotal;
-    }
-
-    public static Dictionary<string, List<Type>> GetServiceByGroups<TServiceType>(
-        string nameSpace = "")
-    {
-        // var dictionary = new Dictionary<string, List<Type>>();
-
-
-        // Assembly.GetExecutingAssembly().GetTypes()
-        //     .Where(t => typeof(TServiceType).IsAssignableFrom(t)
-        //     && typeof(TServiceType).GetCustomAttribute<ServiceGroup>() is not null)
-
-        return null;
-    }
-
     public static void Main(string[] args)
     {
         var testDbContext = new TestDbContext(new DbContextOptionsBuilder()

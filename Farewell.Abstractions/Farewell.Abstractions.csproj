@@ -7,9 +7,4 @@
         <RootNamespace>Farewell.Abstractions</RootNamespace>
     </PropertyGroup>
 
-    <ItemGroup>
-      <Folder Include="Data\" />
-      <Folder Include="Extensions\" />
-    </ItemGroup>
-
 </Project>
