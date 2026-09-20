@@ -25,18 +25,23 @@ public sealed class DomainIdentityConvention : IModelFinalizingConvention
             var member = (MemberInfo?)property.PropertyInfo ?? property.FieldInfo;
             if (member is null) continue;
 
-            if (member.GetCustomAttribute<IdentityAttribute>() is null) continue;
+            var attr = member.GetCustomAttribute<IdentityAttribute>();
+            if (attr is null) continue;
 
-            property.ValueGenerated = ValueGenerated.OnAdd;
+            if (attr.AutoGenerate)
+                property.ValueGenerated = ValueGenerated.OnAdd;
 
             var pk = entityType.FindPrimaryKey();
             if (pk is not null && pk.Properties.Contains(property))
                 continue;
 
-            if (entityType.FindKey(property) is null)
-            {
-                entityType.AddKey(property);
-            }
+            var hasIndex = entityType.GetIndexes()
+                .Any(i => i.Properties.Count == 1 && i.Properties[0] == property);
+
+            if (hasIndex) continue;
+
+            var index = entityType.AddIndex(property);
+            index.IsUnique = true;
         }
     }
 }

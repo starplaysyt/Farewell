@@ -7,13 +7,6 @@ namespace Farewell.Debug;
 
 public class TestDbContext(DbContextOptionsBuilder builder) : DbContext(builder.Options)
 {
-    protected override void ConfigureConventions(
-        ModelConfigurationBuilder configurationBuilder)
-    {
-        configurationBuilder.Conventions
-            .Add(_ => new DomainIdentityConvention());
-    }
-    
     public DbSet<TestAEntity> TestAEntities { get; set; }
     public DbSet<TestBEntity> TestBEntities { get; set; }
     public DbSet<TestCEntity> TestCEntities { get; set; }
