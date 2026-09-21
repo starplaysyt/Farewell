@@ -19,6 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Farewell.Application\Farewell.Application.csproj" />
       <ProjectReference Include="..\Farewell.DI\Farewell.DI.csproj" />
     </ItemGroup>
 
