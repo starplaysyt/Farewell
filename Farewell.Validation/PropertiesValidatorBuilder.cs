@@ -1,7 +1,7 @@
 using System.Linq.Expressions;
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation;
 
 public sealed class PropertiesValidatorBuilder<T>
 {

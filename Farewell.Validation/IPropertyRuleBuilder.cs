@@ -1,6 +1,6 @@
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation;
 
 internal interface IPropertyRuleBuilder<in T>
 {

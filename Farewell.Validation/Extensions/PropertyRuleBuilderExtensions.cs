@@ -1,6 +1,6 @@
-using Farewell.Application.Validation.Constraints;
+using Farewell.Validation.Constraints;
 
-namespace Farewell.Application.Validation.Extensions;
+namespace Farewell.Validation.Extensions;
 
 public static class PropertyRuleBuilderExtensions
 {

@@ -1,7 +1,7 @@
 using System.Text.RegularExpressions;
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation.Constraints;
+namespace Farewell.Validation.Constraints;
 
 public static class StringConstraints
 {

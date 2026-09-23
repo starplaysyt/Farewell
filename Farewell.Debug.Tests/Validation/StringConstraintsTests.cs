@@ -1,5 +1,5 @@
 using Farewell.Abstractions.Validation;
-using Farewell.Application.Validation.Constraints;
+using Farewell.Validation.Constraints;
 
 namespace Farewell.Debug.Tests.Validation;
 

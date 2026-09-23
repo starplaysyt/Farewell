@@ -1,7 +1,7 @@
 using Farewell.Abstractions.Validation;
-using Farewell.Application.Validation.Internal;
+using Farewell.Validation.Internal;
 
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation;
 
 public abstract class FluentValidator<T> : IFluentValidator<T>
 {

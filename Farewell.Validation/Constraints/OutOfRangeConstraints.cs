@@ -1,6 +1,6 @@
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation.Constraints;
+namespace Farewell.Validation.Constraints;
 
 /// <summary>
 /// Numeric constraints — для любого IComparable[T].

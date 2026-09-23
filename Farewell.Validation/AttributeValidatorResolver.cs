@@ -3,7 +3,7 @@ using System.Reflection;
 using Farewell.Abstractions.Attributes.Validation;
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation;
 
 public sealed class AttributeValidatorResolver : IValidatorResolver
 {

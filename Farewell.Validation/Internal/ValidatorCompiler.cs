@@ -1,6 +1,6 @@
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation.Internal;
+namespace Farewell.Validation.Internal;
 
 internal static class ValidatorCompiler
 {

@@ -1,6 +1,4 @@
-using Farewell.Application.Validation.Internal;
-
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation.Internal;
 
 // Rule description for one property
 // Used by Builder, compiles in one time

@@ -1,7 +1,7 @@
 using Farewell.Abstractions.Attributes.Validation;
 using Farewell.Abstractions.Validation;
-using Farewell.Application.Validation;
-using Farewell.Application.Validation.Extensions;
+using Farewell.Validation;
+using Farewell.Validation.Extensions;
 
 namespace Farewell.Debug.Tests.Validation;
 

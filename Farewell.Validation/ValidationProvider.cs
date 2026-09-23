@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Application.Validation;
+namespace Farewell.Validation;
 
 public sealed class ValidationProvider(IValidatorResolver resolver) : IValidationProvider
 {
