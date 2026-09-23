@@ -1,6 +1,6 @@
 ﻿using Farewell.Abstractions.DI;
 
-namespace Farewell.DI;
+namespace Farewell.Abstractions.Extensions;
 
 public static class KeyedServiceProviderExtensions
 {
