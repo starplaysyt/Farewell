@@ -1,5 +1,6 @@
 ﻿using Farewell.Abstractions.Configuration;
 using Farewell.Abstractions.Configuration.Exceptions;
+using Farewell.Abstractions.Validation;
 
 namespace Farewell.Configuration;
 
@@ -8,13 +9,15 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
 {
     private readonly string _path;
     private readonly IConfigResolver _resolver;
+    private readonly IValidationProvider? _validationProvider;
     private volatile T _cached;
 
-    public ConfigurationProvider(string path, IConfigResolver resolver)
+    public ConfigurationProvider(string path, IConfigResolver resolver, IValidationProvider? validationProvider = null)
     {
         _path = path;
         _resolver = resolver;
         _cached = Load();
+        _validationProvider = validationProvider;
     }
 
     public T Get() => _cached;
@@ -31,9 +34,11 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
             return defaults;
         }
 
+        T resolved;
+
         try
         {
-            return _resolver.Resolve<T>(_path);
+            resolved = _resolver.Resolve<T>(_path);
         }
         catch (ConfigurationException)
         {
@@ -43,6 +48,13 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
         {
             throw new ConfigurationResolvingException(_path, ex);
         }
+        
+        if (_validationProvider == null) return resolved;
+
+        var validationReport = _validationProvider.ValidateAll(resolved);
+
+        return validationReport.IsSuccess ? resolved : 
+            throw new ConfigurationValidationException(validationReport);
     }
 
     private static void EnsureDirectoryExists(string filePath)
