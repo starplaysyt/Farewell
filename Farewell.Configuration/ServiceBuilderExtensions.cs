@@ -1,7 +1,7 @@
 ﻿using Farewell.Abstractions.Configuration;
 using Farewell.Abstractions.Configuration.Exceptions;
 using Farewell.Abstractions.DI;
-using Microsoft.Extensions.DependencyInjection;
+using Farewell.Abstractions.Extensions;
 
 namespace Farewell.Configuration;
 

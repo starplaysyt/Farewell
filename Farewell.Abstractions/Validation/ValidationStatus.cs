@@ -10,4 +10,6 @@ public sealed class ValidationStatus(ValidationCode code, string propertyName)
 
     public static ValidationStatus Error(ValidationCode code, string propertyName) =>
         new(code, propertyName);
+
+    public override string ToString() => $"{PropertyName} : {Code}";
 }

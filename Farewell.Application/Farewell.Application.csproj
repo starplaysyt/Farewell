@@ -10,8 +10,4 @@
       <ProjectReference Include="..\Farewell.Abstractions\Farewell.Abstractions.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Validation\" />
-    </ItemGroup>
-
 </Project>

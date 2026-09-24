@@ -1,4 +1,6 @@
-﻿namespace Farewell.Abstractions.DI;
+﻿using Farewell.Abstractions.DI;
+
+namespace Farewell.Abstractions.Extensions;
 
 public static class ServiceProviderExtensions
 {
@@ -62,6 +64,57 @@ public static class ServiceProviderExtensions
             var enumerableType = typeof(IEnumerable<>).MakeGenericType(serviceType);
             var result = provider.GetService(enumerableType);
             return (IEnumerable<object>?)result ?? [];
+        }
+        
+        /// <summary>
+        /// Returns keyed service of type T, or null
+        /// </summary>
+        public T? GetKeyedService<T>(object key)
+            where T : class
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+            ArgumentNullException.ThrowIfNull(key);
+            if (provider is not IKeyedServiceProvider keyedServiceProvider)
+                throw new InvalidOperationException("This service provider doesn't support keyed services.");
+            
+            return (T?)keyedServiceProvider.GetKeyedService(typeof(T), key);
+        }
+
+        /// <summary>
+        /// Returns keyed service of type T. Throws exception when there is no such.
+        /// </summary>
+        public T GetRequiredKeyedService<T>(object key)
+            where T : class
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+            ArgumentNullException.ThrowIfNull(key);
+            if (provider is not IKeyedServiceProvider keyedServiceProvider)
+                throw new InvalidOperationException("This service provider doesn't support keyed services.");
+
+            var service = (T?)keyedServiceProvider.GetKeyedService(typeof(T), key);
+            if (service is null)
+                throw new InvalidOperationException(
+                    $"Keyed service of type '{typeof(T)}' with key '{key}' is not registered.");
+            return service;
+        }
+
+        /// <summary>
+        /// Returns keyed service of type serviceType, or null
+        /// </summary>
+        public object GetRequiredKeyedService(Type serviceType, object key)
+        {
+            ArgumentNullException.ThrowIfNull(provider);
+            ArgumentNullException.ThrowIfNull(serviceType);
+            ArgumentNullException.ThrowIfNull(key);
+            
+            if (provider is not IKeyedServiceProvider keyedServiceProvider)
+                throw new InvalidOperationException("This service provider doesn't support keyed services.");
+
+            var service = keyedServiceProvider.GetKeyedService(serviceType, key);
+            if (service is null)
+                throw new InvalidOperationException(
+                    $"Keyed service of type '{serviceType}' with key '{key}' is not registered.");
+            return service;
         }
     }
 }

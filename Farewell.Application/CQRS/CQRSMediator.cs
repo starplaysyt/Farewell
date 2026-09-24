@@ -1,5 +1,5 @@
 ﻿using Farewell.Abstractions.Components;
-using Farewell.Abstractions.DI;
+using Farewell.Abstractions.Extensions;
 
 namespace Farewell.Application.CQRS;
 
