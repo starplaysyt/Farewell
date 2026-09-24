@@ -1,7 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Base", "Farewell.Base\Farewell.Base.csproj", "{DEEDA7C2-1BC4-4219-A6DE-D8D3D3C9F78C}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.DI", "Farewell.DI\Farewell.DI.csproj", "{E1CCAB9C-BF8B-45E0-9A0C-CF74DF55502D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Abstractions", "Farewell.Abstractions\Farewell.Abstractions.csproj", "{7F5DDC99-8D4F-4D25-A670-A40AF7C8F3D8}"
@@ -13,8 +11,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Application", "Farewell.Application\Farewell.Application.csproj", "{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Infrastructure.EntityFramework", "Farewell.Infrastructure.EntityFramework\Farewell.Infrastructure.EntityFramework.csproj", "{97461087-B1DE-43B5-9AFF-73402B521A2F}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Presentation", "Farewell.Presentation\Farewell.Presentation.csproj", "{B5D4C407-4279-4CC7-90D9-85A8C26AAA45}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Farewell.Debug", "Farewell.Debug", "{C4F80CC9-34E2-4847-8456-FDFCCF9CDDDB}"
 EndProject
@@ -28,10 +24,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{DEEDA7C2-1BC4-4219-A6DE-D8D3D3C9F78C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DEEDA7C2-1BC4-4219-A6DE-D8D3D3C9F78C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DEEDA7C2-1BC4-4219-A6DE-D8D3D3C9F78C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DEEDA7C2-1BC4-4219-A6DE-D8D3D3C9F78C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E1CCAB9C-BF8B-45E0-9A0C-CF74DF55502D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E1CCAB9C-BF8B-45E0-9A0C-CF74DF55502D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1CCAB9C-BF8B-45E0-9A0C-CF74DF55502D}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -56,10 +48,6 @@ Global
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B5D4C407-4279-4CC7-90D9-85A8C26AAA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B5D4C407-4279-4CC7-90D9-85A8C26AAA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B5D4C407-4279-4CC7-90D9-85A8C26AAA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B5D4C407-4279-4CC7-90D9-85A8C26AAA45}.Release|Any CPU.Build.0 = Release|Any CPU
 		{641E5107-5135-4FA8-B045-B1D8A95009DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{641E5107-5135-4FA8-B045-B1D8A95009DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{641E5107-5135-4FA8-B045-B1D8A95009DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
