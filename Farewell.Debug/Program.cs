@@ -43,6 +43,7 @@
 //          pipeline.RunMiddleware<TestMiddleware2>();
 //     });
 
+using System.Collections.Frozen;
 using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.DI;
@@ -82,7 +83,7 @@ public class Program
         // var result = prov.GetRequiredKeyedService<ITestContext>("B");
         //
         // Console.WriteLine(result.GetType().FullName);
-        
+
 
 
         // var commandType = typeof(CQRSCommand);
