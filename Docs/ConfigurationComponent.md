@@ -1,60 +1,52 @@
 ## Overview
 
-A lightweight, thread-safe configuration library for .NET that loads structured data from files and exposes it as strongly-typed C# objects through a clean API. Designed to be used as a singleton registered in a DI container, the system parses configuration files into an internal JSON tree on startup and provides both primitive value access and full section deserialization on demand.
+Configuration System is a lightweight, extensible library for managing application configuration files in .NET. It provides a strongly-typed, tree-structured approach to configuration — each configuration file is represented as a plain C# class that is serialized and deserialized automatically.
 
-Key capabilities:
-- Load configuration from **JSON** files (YAML and others via extensions)
-- Access values by **colon-separated path** (`"database:connection:host"`)
-- Deserialize entire **configuration sections** into typed classes
-- **Cache** all resolved values — no repeated parsing or reflection
-- **Hot reload** support — swap configuration at runtime without downtime
-- Optional **file watching** — automatic reload on file change
-- **Keyed DI registration** — multiple independent providers, one per file
+The system is built around the DI container and follows a provider-per-file model: each configuration file gets its own singleton `IConfigurationProvider<T>`, resolved by generic type. Multiple file formats are supported through a pluggable resolver mechanism, with JSON support built in via BCL with no additional dependencies.
 
 ---
 
 ## Quick Start
 
-**1. Define a configuration class**
 ```csharp
-[ConfigSection("database")]
-public class DatabaseConfig
+// 1. Declare your configuration class with defaults
+public sealed class AppConfig
 {
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
-    public string Name { get; set; } = string.Empty;
+    public string ApplicationName { get; set; } = "MyApp";
+    public int MaxConnections { get; set; } = 100;
+    public LoggingConfig Logging { get; set; } = new();
 }
-```
 
-**2. Register in DI**
-```csharp
-services
-    .AddConfigurationProvider(
-        key: "appsettings",
-        parser: new JsonConfigParser("appsettings.json"),
-        watchFile: true
-    )
-    .AddConfigurationSection<DatabaseConfig>("appsettings");
-```
-
-**3. Use in your services**
-```csharp
-// Inject a typed configuration class directly
-public class MyService
+public sealed class LoggingConfig
 {
-    public MyService(DatabaseConfig config)
+    public string Level { get; set; } = "Information";
+    public bool WriteToFile { get; set; } = false;
+}
+
+// 2. Register the system
+ServiceBuilder builder = new ServiceBuilder();
+
+builder
+    .AddJsonConfigResolver()
+    .AddConfig<AppConfig>("/etc/myapp/app.json")
+    .AddConfig<DatabaseConfig>("/etc/myapp/database.json");
+
+IServiceProvider provider = builder.Build();
+
+// 3. Consume in your service
+public sealed class MyService
+{
+    private readonly IConfigurationProvider<AppConfig> _config;
+
+    public MyService(IConfigurationProvider<AppConfig> config)
     {
-        Console.WriteLine(config.Host);
+        _config = config;
     }
-}
 
-// Or work with the provider directly
-public class MyService
-{
-    public MyService([FromKeyedServices("appsettings")] IConfigurationProvider config)
+    public void Run()
     {
-        var port = config.Get<int>("server:port");
-        var db = config.GetSection<DatabaseConfig>();
+        var config = _config.Get();
+        Console.WriteLine(config.ApplicationName);
     }
 }
 ```
@@ -63,195 +55,224 @@ public class MyService
 
 ## Core Concepts
 
-### Architecture Overview
+### Provider-per-file model
+
+Each configuration file is backed by a dedicated `IConfigurationProvider<T>` singleton. The generic parameter `T` uniquely identifies the provider in the DI container — no keyed services or string identifiers are needed on the consumer side.
 
 ```
-JSON Files
-    ↓
-IConfigParser  ──────────────────────────────────────────┐
-    ↓                                                     │
-JsonElement (internal tree)             IWatchableConfigParser
-    ↓                                  (optional file watching)
-ConfigurationProvider (singleton)
-    ├── volatile JsonElement _root       ← atomic swap on reload
-    ├── volatile ConcurrentDictionary    ← invalidated on reload
-    └── static path split cache         ← shared across providers
-         ↓
-    DI Container
-    ├── Keyed IConfigurationProvider     ← direct provider access
-    └── Typed configuration classes      ← factory → provider → section
+IConfigurationProvider<AppConfig>      →  app.json
+IConfigurationProvider<DatabaseConfig> →  database.json
+IConfigurationProvider<NetworkConfig>  →  network.yml
 ```
 
-### Internal Tree
+### Configuration tree
 
-Configuration files are parsed into a `JsonElement` tree using `System.Text.Json`. This representation is format-agnostic — regardless of the source file format, everything is normalized into the same JSON tree internally. Navigation through the tree is performed by splitting the colon-separated path and traversing properties level by level.
+A configuration is a plain C# class — a POCO with no required base classes or attributes. Nesting is supported naturally through object composition. Default values are declared directly on the class properties.
 
-### Caching Strategy
-
-The system uses two levels of caching:
-
-| Cache | Scope | Lifetime |
-|---|---|---|
-| Resolved values (`ConcurrentDictionary`) | Per provider instance | Invalidated on `Reload()` |
-| Path segments (`string[]`) | Static, shared | Application lifetime |
-| Attribute paths (`Type → string`) | Static, shared | Application lifetime |
-
-### Thread Safety
-
-`_root` and `_cache` are both `volatile`, ensuring atomic reference swaps visible across threads. Concurrent reads are lock-free. On reload, a new root and a new empty cache are built independently and then swapped in — readers continue using the old root until the swap completes.
-
----
-
-## Configuration Files
-
-### JSON
-
-Standard JSON files are supported out of the box. Keys are matched case-insensitively during deserialization.
-
-```json
+```csharp
+public sealed class AppConfig          // root
 {
-    "server": {
-        "host": "localhost",
-        "port": 8080
-    },
-    "database": {
-        "host": "db.local",
-        "port": 5432,
-        "name": "mydb"
-    }
+    public string Name { get; set; } = "MyApp";
+    public DatabaseConfig Database { get; set; } = new();  // branch
+    public List<EndpointConfig> Endpoints { get; set; } = new();  // collection
 }
 ```
 
-```csharp
-var parser = new JsonConfigParser("appsettings.json");
-var provider = new ConfigurationProvider(parser);
+### Resolver-per-format model
+
+File format handling is decoupled from the provider. An `IConfigResolver` is responsible for reading and writing a specific file format. Resolvers are registered as keyed singletons in the DI container, where the key is the file extension.
+
+```
+".json"  →  JsonConfigResolver
+".yml"   →  YamlConfigResolver   (external package)
+".toml"  →  TomlConfigResolver   (custom)
+```
+
+### Eager initialization
+
+All singletons — including configuration providers — are constructed at `Build()` time. This means configuration errors (missing resolvers, invalid file content) surface immediately at startup rather than at runtime when a service first requests the config.
+
+### File lifecycle
+
+```
+AddConfig<T>(path) called
+    │
+    └── at Build()
+            │
+            ├── file exists → resolver reads and deserializes → cached in provider
+            │       └── invalid content → ConfigurationResolvingException ❌
+            │
+            └── file not found → new T() with defaults → resolver writes to disk → cached
+                    └── directory created automatically if missing
 ```
 
 ---
 
-## Accessing Configuration Values
+## Configuration Classes
 
-### Primitive values — `Get<T>`
-
-Use `Get<T>` to retrieve a single primitive value by path. `T` must implement `IParsable<T>`.
+Configuration classes are plain C# classes. There are no required base classes, interfaces, or attributes. The only requirement is a parameterless constructor, which is used to generate default values when a config file does not yet exist.
 
 ```csharp
-var host = provider.Get<string>("server:host");   // "localhost"
-var port = provider.Get<int>("server:port");       // 8080
-var ratio = provider.Get<double>("app:threshold"); // 0.95
-```
-
-Throws `ConfigKeyNotFoundException` if the path does not exist.
-
----
-
-### Configuration sections — `GetSection<T>`
-
-Use `GetSection<T>` to deserialize an entire subtree into a typed class.
-
-**By explicit path:**
-```csharp
-var db = provider.GetSection<DatabaseConfig>("database");
-Console.WriteLine(db.Host); // "db.local"
-```
-
-**By `[ConfigSection]` attribute:**
-```csharp
-[ConfigSection("database")]
-public class DatabaseConfig
+public sealed class AppConfig
 {
-    public string Host { get; set; } = string.Empty;
-    public int Port { get; set; }
-}
-
-var db = provider.GetSection<DatabaseConfig>(); // path resolved from attribute
-```
-
-Throws `ConfigSectionAttributeMissingException` if the attribute is missing when using the no-path overload.
-
----
-
-### DI — typed class injection
-
-When registered via `AddConfigurationSection<T>`, the typed class can be injected directly without referencing the provider:
-
-```csharp
-services.AddConfigurationSection<DatabaseConfig>("appsettings");
-
-// In your service
-public class Repository
-{
-    public Repository(DatabaseConfig config) { ... }
+    public string ApplicationName { get; set; } = "MyApp";
+    public int MaxConnections { get; set; } = 100;
+    public NestedConfig Nested { get; set; } = new();
 }
 ```
 
+Nesting depth is unlimited. Collections are supported as long as the underlying serializer handles them.
+
 ---
 
-### DI — keyed provider access
+## Registering Resolvers
 
-When you need ad-hoc access to arbitrary values without a typed class:
+A resolver must be registered before any config file using that format can be added. The system ships with a built-in JSON resolver.
 
 ```csharp
-public class MyService
-{
-    private readonly IConfigurationProvider _config;
+// Built-in JSON support
+builder.AddJsonConfigResolver();
 
-    public MyService([FromKeyedServices("appsettings")] IConfigurationProvider config)
+// Custom resolver for any format
+builder.AddConfigResolver<MyTomlResolver>(".toml");
+
+// External YAML package (example)
+builder.AddYamlConfigResolver();
+```
+
+`AddConfigResolver<TResolver>(string fileExtension)` is the universal registration method. It registers `TResolver` as a keyed singleton under the given extension. The same resolver type can be registered under multiple extensions:
+
+```csharp
+builder.AddConfigResolver<YamlConfigResolver>(".yml");
+builder.AddConfigResolver<YamlConfigResolver>(".yaml");
+```
+
+---
+
+## Registering Configuration Files
+
+```csharp
+// Absolute path
+builder.AddConfig<AppConfig>("/etc/myapp/app.json");
+
+// Relative to application base directory
+builder.AddConfig<AppConfig>("config/app.json", relativeToBaseDirectory: true);
+```
+
+If the specified file does not exist, it will be created with the default values from `new T()`. The directory structure will also be created if it does not exist. If the file exists but cannot be parsed, a `ConfigurationResolvingException` is thrown at `Build()` time.
+
+If no resolver is registered for the file's extension, a `ConfigurationResolverNotFoundException` is thrown immediately with a message indicating which extension is missing and how to register a resolver for it.
+
+---
+
+## Consuming Configuration
+
+Configuration is consumed by injecting `IConfigurationProvider<T>` into any service. Since it is a singleton, it is safe to hold a reference for the lifetime of the application.
+
+```csharp
+public sealed class MyService
+{
+    private readonly IConfigurationProvider<AppConfig> _config;
+
+    public MyService(IConfigurationProvider<AppConfig> config)
     {
         _config = config;
     }
 
     public void DoWork()
     {
-        var timeout = _config.Get<int>("app:timeout");
+        // Always returns the current cached value
+        AppConfig config = _config.Get();
     }
 }
 ```
 
+`Get()` is a direct field read with no I/O — it returns the cached root object.
+
 ---
 
-## Hot Reload
+## Reloading Configuration
 
-### Manual reload
-
-Call `Reload()` explicitly at any point. The old configuration remains available to all readers until the new tree is fully built and swapped in:
+The provider exposes a `Reload()` method that re-reads the file from disk and updates the internal cache. The reload follows the same logic as the initial load.
 
 ```csharp
+IConfigurationProvider<AppConfig> provider = ...;
+
 provider.Reload();
+AppConfig fresh = provider.Get();
 ```
 
-### File watching
+If the file is invalid at reload time, `ConfigurationResolvingException` is thrown and **the previous cached value is preserved**. This means the application continues running with the last known good configuration.
 
-Enable automatic reload when the file changes by passing `watchFile: true` during registration. A debounce of 300ms is applied to prevent multiple rapid reloads on a single save:
+`Get()` is thread-safe by virtue of `volatile` field semantics. Reference replacement is atomic, and `volatile` ensures visibility across cores. No locking is performed.
+
+---
+
+## Implementing a Custom Resolver
+
+To support a new file format, implement `IConfigResolver` and register it with the appropriate extension.
 
 ```csharp
-services.AddConfigurationProvider(
-    key: "appsettings",
-    parser: new JsonConfigParser("appsettings.json"),
-    watchFile: true  // triggers Reload() automatically on file change
-);
+public sealed class TomlConfigResolver : IConfigResolver
+{
+    public T Resolve<T>(string absolutePath) where T : class
+    {
+        var content = File.ReadAllText(absolutePath);
+        return TomlSerializer.Deserialize<T>(content)
+            ?? throw new InvalidOperationException("Deserialization returned null.");
+    }
+
+    public void SaveDefaults<T>(string absolutePath, T instance) where T : class
+    {
+        var content = TomlSerializer.Serialize(instance);
+        File.WriteAllText(absolutePath, content);
+    }
+}
+
+// Registration
+builder.AddConfigResolver<TomlConfigResolver>(".toml");
 ```
 
-File watching requires the parser to implement `IWatchableConfigParser`. If `watchFile: true` is passed with a parser that does not implement it, an `InvalidOperationException` is thrown at startup.
+`Resolve<T>` is responsible for reading the file and returning a fully deserialized object. Any exception thrown from `Resolve<T>` that is not already a `ConfigurationException` will be wrapped in `ConfigurationResolvingException` by the provider.
+
+`SaveDefaults<T>` is called only when a config file does not exist. It receives a `new T()` instance populated with declared defaults and is responsible for persisting it in the correct format.
+
+---
+
+## Validation Integration
+
+If `IValidationProvider` is registered in the DI container, the configuration system will automatically validate the deserialized object after every load and reload. No additional setup is required — the provider resolves `IValidationProvider` as an optional dependency.
+
+```csharp
+// Validation runs automatically if this is registered
+builder.AddSingleton<IValidationProvider, MyValidationProvider>();
+builder.AddJsonConfigResolver();
+builder.AddConfig<AppConfig>("app.json");
+```
+
+If validation fails, a `ConfigurationValidationException` is thrown containing the full `ValidationReport`. Default values written to a newly created file are **not validated** — defaults are considered trusted by design.
 
 ---
 
 ## Key Design Decisions
 
-**`JsonElement` as internal tree**
-`System.Text.Json` is part of the BCL — no additional dependencies required. The internal tree is format-agnostic; any file format can be converted to `JsonElement` before being handed to the provider. `RootElement.Clone()` ensures the element is independent of the originating `JsonDocument` and safe to hold long-term.
+**Generic provider as DI key**
+`IConfigurationProvider<T>` is unique per type `T`. This eliminates the need for string-based keyed service resolution on the consumer side, which avoids stringly-typed identifiers and makes misconfiguration a compile-time issue rather than a runtime one.
 
-**Atomic swap on reload**
-Both `_root` and `_cache` are `volatile` references. Reload builds a new tree and a new empty cache independently, then swaps both references atomically. Readers in flight continue using the old root — no locks, no downtime, no inconsistent state.
+**Resolvers as keyed singletons by file extension**
+Resolvers are stateless by design — they open a file, parse it, and return. Registering them as keyed singletons by extension keeps format selection implicit (driven by the file path) while making it fully explicit in the registration. No resolver registry object is needed.
 
-**Keyed providers over a single merged provider**
-Each file gets its own independent provider singleton registered with a DI key. This avoids key collision between files, allows independent reload cycles per file, and keeps provider responsibilities clearly scoped.
+**Eager initialization**
+Fail-fast at startup is preferable to silent failure at runtime. Building the DI container with broken configuration should crash the process immediately with a clear error, not surface as a `NullReferenceException` minutes later in production.
 
-**Two-level get API**
-`Get<T>` and `GetSection<T>` are intentionally separate methods with different generic constraints rather than a single method resolved at runtime. This makes intent explicit at the call site and avoids runtime type inspection.
+**Defaults are not validated**
+Default values are declared by the developer in the class definition and are considered correct by contract. Validating them would couple the configuration system's startup behavior to the validation rules, making it impossible to start with intentionally partial defaults.
 
-**Static caches for reflection and path splitting**
-Attribute paths and split path segments are cached in static `ConcurrentDictionary` instances shared across all providers. Both are computed once and never change — the static scope is intentional and correct.
+**`volatile` without locking on reload**
+Replacing the cached reference is atomic on 64-bit runtimes. `volatile` provides the necessary memory visibility guarantee across cores. A full lock would add overhead to every `Get()` call — which is a hot path — for a scenario (concurrent reload) that is rare and non-critical in most applications.
+
+**No merge, no layering**
+Configuration files are fully isolated. Each file maps to exactly one type and one provider. This removes an entire class of bugs related to override order, partial merges, and unexpected value sources.
 
 ---
 
@@ -259,9 +280,9 @@ Attribute paths and split path segments are cached in static `ConcurrentDictiona
 
 | Interface | Responsibility |
 |---|---|
-| `IConfigurationProvider` | Main consumer-facing contract. Exposes `Get<T>`, `GetSection<T>` and `Reload()` |
-| `IConfigParser` | Abstracts file reading and parsing. Returns a `JsonElement` root |
-| `IWatchableConfigParser` | Extends `IConfigParser` with a `FilePath` property, enabling file watching in the provider |
+| `IConfigurationProvider<T>` | Owns the lifecycle of the root configuration object of type `T`. Provides access via `Get()` and supports explicit cache refresh via `Reload()`. |
+| `IConfigResolver` | Handles file format–specific reading (`Resolve<T>`) and writing (`SaveDefaults<T>`). Stateless by design. |
+| `IValidationProvider` | Optional dependency. Validates a deserialized configuration object and returns a `ValidationReport`. Consumed by the provider after every successful resolve. |
 
 ---
 
@@ -269,7 +290,7 @@ Attribute paths and split path segments are cached in static `ConcurrentDictiona
 
 | What to extend | How |
 |---|---|
-| Add a new file format (e.g. YAML, TOML, INI) | Implement `IConfigParser` (and optionally `IWatchableConfigParser`), convert your format to `JsonElement` internally |
-| Add new DI registration helpers | Add extension methods on `IServiceCollection` following the pattern in `ConfigurationProviderExtensions` |
-| Custom reload triggers (e.g. remote config, environment variable changes) | Obtain a reference to `IConfigurationProvider` and call `Reload()` from any trigger — HTTP endpoint, background service, signal handler, etc. |
-| Custom deserialization behavior | Modify or extend `JsonSerializerOptions` used in `GetSection<T>` — add converters, naming policies, etc. |
+| Add a new file format | Implement `IConfigResolver`, register via `builder.AddConfigResolver<TResolver>(".ext")` |
+| Support multiple extensions for one format | Call `AddConfigResolver<TResolver>` multiple times with different extensions |
+| Enable validation | Register `IValidationProvider` in the DI container — the provider picks it up automatically |
+| Package a resolver for distribution | Create a separate NuGet package, expose an extension method `AddMyFormatConfigResolver()` that calls `AddConfigResolver<T>` internally |
