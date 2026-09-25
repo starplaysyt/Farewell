@@ -8,8 +8,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Debug.Tests", "Far
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Debug", "Farewell.Debug\Farewell.Debug.csproj", "{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Application", "Farewell.Application\Farewell.Application.csproj", "{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Infrastructure.EntityFramework", "Farewell.Infrastructure.EntityFramework\Farewell.Infrastructure.EntityFramework.csproj", "{97461087-B1DE-43B5-9AFF-73402B521A2F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Farewell.Debug", "Farewell.Debug", "{C4F80CC9-34E2-4847-8456-FDFCCF9CDDDB}"
@@ -42,10 +40,6 @@ Global
 		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DB0B9FA3-9ABC-4CB4-9332-A8A2679ED7BE}.Release|Any CPU.Build.0 = Release|Any CPU
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{97461087-B1DE-43B5-9AFF-73402B521A2F}.Release|Any CPU.ActiveCfg = Release|Any CPU

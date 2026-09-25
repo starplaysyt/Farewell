@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Domain;
+using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Infrastructure;
 
 namespace Farewell.Infrastructure.Extensions;

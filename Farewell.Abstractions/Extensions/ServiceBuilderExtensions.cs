@@ -1,4 +1,6 @@
-﻿namespace Farewell.Abstractions.DI;
+﻿using Farewell.Abstractions.DI;
+
+namespace Farewell.Abstractions.Extensions;
 
 public static class ServiceBuilderExtensions
 {

@@ -1,6 +1,6 @@
 using Farewell.Abstractions.Components;
 
-namespace Farewell.Application.CQRS;
+namespace Farewell.Abstractions.CQRS;
 
 public abstract record CQRSQuery : IDTOComponent
 {

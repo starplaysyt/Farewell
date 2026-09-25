@@ -9,7 +9,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Farewell.Abstractions\Farewell.Abstractions.csproj" />
-      <ProjectReference Include="..\Farewell.Application\Farewell.Application.csproj" />
       <ProjectReference Include="..\Farewell.DI\Farewell.DI.csproj" />
       <ProjectReference Include="..\Farewell.Infrastructure.EntityFramework\Farewell.Infrastructure.EntityFramework.csproj" />
     </ItemGroup>

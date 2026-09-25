@@ -1,14 +1,14 @@
-﻿using System.Reflection;
+using System.Reflection;
+using Farewell.Abstractions.CQRS;
 using Farewell.Abstractions.DI;
-using Farewell.Application.CQRS;
 
-namespace Farewell.Application.Extensions;
+namespace Farewell.Abstractions.Extensions;
 
-public static class ServiceBuilderExtensions
+public static class CQRSServiceBuilderExtensions
 {
     public static IServiceBuilder AddMediator(this IServiceBuilder builder)
     {
-        builder.AddScoped<CQRSMediator>();
+        builder.AddScoped<Mediator>();
         return builder;
     }
     
@@ -18,10 +18,10 @@ public static class ServiceBuilderExtensions
             .Where(t => t.IsClass && !t.IsAbstract)
             .SelectMany(t => t.GetInterfaces(), (impl, iface) => new { impl, iface })
             .Where(x => x.iface.IsGenericType && 
-                        (x.iface.GetGenericTypeDefinition() == typeof(CQRSAsyncHandler<,>) ||
-                         x.iface.GetGenericTypeDefinition() == typeof(CQRSAsyncHandler<>) ||
-                         x.iface.GetGenericTypeDefinition() == typeof(CQRSSyncHandler<,>) ||
-                         x.iface.GetGenericTypeDefinition() == typeof(CQRSSyncHandler<>)));
+                        (x.iface.GetGenericTypeDefinition() == typeof(AsyncHandler<,>) ||
+                         x.iface.GetGenericTypeDefinition() == typeof(AsyncHandler<>) ||
+                         x.iface.GetGenericTypeDefinition() == typeof(SyncHandler<,>) ||
+                         x.iface.GetGenericTypeDefinition() == typeof(SyncHandler<>)));
 
         foreach (var binding in handlerTypes)
         {
