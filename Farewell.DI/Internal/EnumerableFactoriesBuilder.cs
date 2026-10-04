@@ -17,16 +17,15 @@ internal static class EnumerableFactoriesBuilder
         {
             var elementType = serviceType;
             var enumerableType = typeof(IEnumerable<>).MakeGenericType(elementType);
-
-            // Захватываем массив CompiledService, а не сырых фабрик
+            
             var svcs = services.ToArray();
 
             result[enumerableType] = sp =>
             {
                 var typed = Array.CreateInstance(elementType, svcs.Length);
-                for (int i = 0; i < svcs.Length; i++)
+                for (var i = 0; i < svcs.Length; i++)
                 {
-                    object instance = sp switch
+                    var instance = sp switch
                     {
                         ServiceScope scope => scope.ResolveFromCompiledService(svcs[i]),
                         ServiceProvider prov => prov.ResolveFromCompiledService(svcs[i]),

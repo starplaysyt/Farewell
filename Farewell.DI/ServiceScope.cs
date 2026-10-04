@@ -33,7 +33,7 @@ public sealed class ServiceScope : IKeyedServiceProvider
                 return cached;
 
             var factory = _provider.GetScopedFactory(serviceType);
-            var instance = factory(this);
+            var instance = factory(this, null);
 
             _scopedCache[serviceType] = instance;
             if (instance is IDisposable disposable)
@@ -46,7 +46,7 @@ public sealed class ServiceScope : IKeyedServiceProvider
         if (_provider.HasTransientFactory(serviceType))
         {
             var factory = _provider.GetTransientFactory(serviceType);
-            var instance = factory(this);
+            var instance = factory(this, null);
             if (instance is IDisposable disposable)
                 _disposables.Add(disposable);
             return instance;
@@ -92,7 +92,7 @@ public sealed class ServiceScope : IKeyedServiceProvider
                 return cached;
 
             var factory = _provider.GetKeyedScopedFactory(serviceType, key);
-            var instance = factory(this);
+            var instance = factory(this, key);
 
             _keyedScopedCache[cacheKey] = instance;
             if (instance is IDisposable disposable)
@@ -104,7 +104,7 @@ public sealed class ServiceScope : IKeyedServiceProvider
         if (_provider.HasKeyedTransientFactory(serviceType, key))
         {
             var factory = _provider.GetKeyedTransientFactory(serviceType, key);
-            var instance = factory(this);
+            var instance = factory(this, key);
             if (instance is IDisposable disposable)
                 _disposables.Add(disposable);
             return instance;
@@ -123,13 +123,15 @@ public sealed class ServiceScope : IKeyedServiceProvider
             case ServiceLifetimeType.Scoped:
                 if (_scopedBySlot.TryGetValue(svc.SlotId, out var cached))
                     return cached;
-                var scoped = svc.Factory(this);
+                // CHANGED: Providing key to the factory
+                var scoped = svc.Factory(this, svc.Key);
                 _scopedBySlot[svc.SlotId] = scoped;
                 if (scoped is IDisposable sd) _disposables.Add(sd);
                 return scoped;
 
             case ServiceLifetimeType.Transient:
-                var transient = svc.Factory(this);
+                // CHANGED: Providing key to the factory
+                var transient = svc.Factory(this, svc.Key);
                 if (transient is IDisposable td) _disposables.Add(td);
                 return transient;
 

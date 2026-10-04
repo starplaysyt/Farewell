@@ -17,6 +17,17 @@ public sealed class ServiceBuilder : IServiceBuilder
         return this;
     }
 
+    public IServiceBuilder AddService(Type serviceType, Func<IServiceProvider, object?, object> implementationFactory,
+        ServiceLifetimeType lifetime, object? key = null)
+    {
+        ArgumentNullException.ThrowIfNull(serviceType);
+        ArgumentNullException.ThrowIfNull(implementationFactory);
+        
+        _descriptors.Add(ServiceDescriptor.FromFactory(serviceType, implementationFactory, lifetime, key));
+
+        return this;
+    }
+
     public IServiceBuilder AddService(Type serviceType, Type implementationType,
         ServiceLifetimeType serviceLifetime, object? key)
     {

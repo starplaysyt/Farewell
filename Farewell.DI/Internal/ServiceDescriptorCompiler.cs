@@ -17,7 +17,7 @@ internal class ServiceDescriptorCompiler
                 result[dictKey] = [];
 
             Type implType;
-            Func<IServiceProvider, object> factory;
+            Func<IServiceProvider, object?, object> factory;
             Type[] depTypes;
             object?[] depKeys;
 

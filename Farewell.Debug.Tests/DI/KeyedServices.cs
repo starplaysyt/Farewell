@@ -101,4 +101,81 @@ public class KeyedTests
         Assert.Throws<InvalidOperationException>(() =>
             provider.GetRequiredKeyedService<ICache>("any"));
     }
+
+    [Fact]
+    public void KeyedSingleton_FactoryReceiveServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        object expectedKey = "my-key";
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Singleton,
+            key: expectedKey);
+
+        var provider = builder.Build();
+
+        var instance = provider.GetKeyedService(typeof(IDependency), expectedKey);
+
+        Assert.NotNull(instance);
+        Assert.Equal(expectedKey, capturedKey);
+    }
+    
+    [Fact]
+    public void KeyedScoped_FactoryReceiveServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        object expectedKey = "my-key";
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Scoped,
+            key: expectedKey);
+
+        var provider = builder.Build();
+
+        using var scope = provider.CreateScope();
+
+        var instance = scope.GetKeyedService(typeof(IDependency), expectedKey);
+
+        Assert.NotNull(instance);
+        Assert.Equal(expectedKey, capturedKey);
+    }
+    
+    [Fact]
+    public void KeyedTransient_FactoryReceiveServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        object expectedKey = "my-key";
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Transient,
+            key: expectedKey);
+
+        var provider = builder.Build();
+
+        var instance = provider.GetKeyedService(typeof(IDependency), expectedKey);
+
+        Assert.NotNull(instance);
+        Assert.Equal(expectedKey, capturedKey);
+    }
 }

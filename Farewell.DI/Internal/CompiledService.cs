@@ -9,7 +9,7 @@ internal sealed class CompiledService
     public required Type ImplementationType { get; init; }
     public required ServiceLifetimeType Lifetime { get; init; }
     public required object? Key { get; init; }
-    public required Func<IServiceProvider, object> Factory { get; init; }
+    public required Func<IServiceProvider, object?, object> Factory { get; init; }
     public required Type[] DependencyTypes { get; init; }
     public required object?[] DependencyKeys { get; init; }
 }

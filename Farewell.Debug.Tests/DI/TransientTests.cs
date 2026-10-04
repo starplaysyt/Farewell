@@ -65,4 +65,27 @@ public class TransientTests
         Assert.Same(singleton, t1!.A);
         Assert.Same(singleton, t2!.A);
     }
+    
+    [Fact]
+    public void Transient_FactoryReceiveNullServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Transient);
+
+        var provider = builder.Build();
+
+        var instance = provider.GetService(typeof(IDependency));
+
+        Assert.NotNull(instance);
+        Assert.Null(capturedKey);
+    }
 }

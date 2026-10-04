@@ -77,4 +77,27 @@ public class SingletonTests
         provider.Dispose();
         Assert.True(svc.IsDisposed);
     }
+    
+    [Fact]
+    public void Singleton_FactoryReceiveNullServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Singleton);
+
+        var provider = builder.Build();
+
+        var instance = provider.GetService(typeof(IDependency));
+
+        Assert.NotNull(instance);
+        Assert.Null(capturedKey);
+    }
 }

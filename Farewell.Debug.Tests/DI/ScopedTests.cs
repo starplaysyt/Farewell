@@ -96,4 +96,29 @@ public class ScopedTests
 
         Assert.Same(singleton, scoped!.A);
     }
+    
+    [Fact]
+    public void Scoped_FactoryReceiveNullServiceKey()
+    {
+        var builder = new ServiceBuilder();
+        var capturedKey = new object();
+
+        builder.AddService(
+            typeof(IDependency),
+            (sp, key) =>
+            {
+                capturedKey = key;
+                return new DependencyA();
+            },
+            ServiceLifetimeType.Scoped);
+
+        var provider = builder.Build();
+        
+        using var scope = provider.CreateScope();
+
+        var instance = scope.GetService(typeof(IDependency));
+
+        Assert.NotNull(instance);
+        Assert.Null(capturedKey);
+    }
 }

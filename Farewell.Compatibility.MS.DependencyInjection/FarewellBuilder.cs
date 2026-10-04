@@ -10,11 +10,19 @@ public class FarewellBuilder(IServiceCollection collection) : IServiceBuilder
     public IServiceBuilder AddService(Type serviceType, Func<IServiceProvider, object> implementationFactory,
         ServiceLifetimeType lifetime, object? key = null)
     {
-        var msFactory = (IServiceProvider provider, object? obj1) =>
-            implementationFactory(provider);
+        collection.Add(new ServiceDescriptor(serviceType, key, DescriptorFactory, (ServiceLifetime)lifetime));
 
-        collection.Add(new ServiceDescriptor(serviceType, key, msFactory, (ServiceLifetime)lifetime));
+        return this;
+        
+        object DescriptorFactory(IServiceProvider provider, object? curKey) 
+            => implementationFactory(provider);
+    }
 
+    public IServiceBuilder AddService(Type serviceType, Func<IServiceProvider, object?, object> implementationFactory,
+        ServiceLifetimeType lifetime, object? key = null)
+    {
+        collection.Add(new ServiceDescriptor(serviceType, key, implementationFactory, (ServiceLifetime)lifetime));
+        
         return this;
     }
 

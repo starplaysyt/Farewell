@@ -190,3 +190,6 @@ public class KeyedConsumer(
     public ICache Fast { get; } = fast;
     public ICache Distributed { get; } = distributed;
 }
+
+public interface IDependency { }
+public class DependencyA : IDependency { }

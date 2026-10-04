@@ -6,11 +6,10 @@ public sealed class ServiceDescriptor
 {
     public Type ServiceType { get; }
     public Type? ImplementationType { get; }
-    public Func<IServiceProvider, object>? Factory { get; }
+    public Func<IServiceProvider, object?, object>? Factory { get; }
     public ServiceLifetimeType Lifetime { get; }
     public object? Key { get; }
 
-    public bool IsKeyed => Key is not null;
     public bool IsFactory => Factory is not null;
     public bool IsOpenGeneric => ServiceType.IsGenericTypeDefinition;
 
@@ -18,7 +17,7 @@ public sealed class ServiceDescriptor
     private ServiceDescriptor(
         Type serviceType,
         Type? implementationType,
-        Func<IServiceProvider, object>? factory,
+        Func<IServiceProvider, object?, object>? factory,
         ServiceLifetimeType lifetime,
         object? key)
     {
@@ -48,6 +47,25 @@ public sealed class ServiceDescriptor
     public static ServiceDescriptor FromFactory(
         Type serviceType,
         Func<IServiceProvider, object> factory,
+        ServiceLifetimeType lifetime,
+        object? key = null)
+    {
+        ArgumentNullException.ThrowIfNull(serviceType);
+        ArgumentNullException.ThrowIfNull(factory);
+
+        if (serviceType.IsGenericTypeDefinition)
+            throw new ArgumentException(
+                "Factory registration is not supported for open generic types.",
+                nameof(serviceType));
+
+        return new ServiceDescriptor(serviceType, null, WrapFactory, lifetime, key);
+
+        object WrapFactory(IServiceProvider provider, object? _) => factory(provider);
+    }
+    
+    public static ServiceDescriptor FromFactory(
+        Type serviceType,
+        Func<IServiceProvider, object?, object> factory,
         ServiceLifetimeType lifetime,
         object? key = null)
     {

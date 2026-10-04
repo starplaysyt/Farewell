@@ -13,15 +13,14 @@ public sealed class ServiceProvider : IScopeProvider
     private readonly ConcurrentDictionary<int, object> _singletonBySlot = new();
 
     // Transient delegates
-    private readonly Dictionary<Type, Func<IServiceProvider, object>> _transientFactories;
-
-    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>>
+    private readonly Dictionary<Type, Func<IServiceProvider, object?, object>> _transientFactories;
+    private readonly Dictionary<(Type, object), Func<IServiceProvider, object?, object>>
         _keyedTransientFactories;
 
     // Scoped delegates (only stored here)
-    private readonly Dictionary<Type, Func<IServiceProvider, object>> _scopedFactories;
+    private readonly Dictionary<Type, Func<IServiceProvider, object?, object>> _scopedFactories;
 
-    private readonly Dictionary<(Type, object), Func<IServiceProvider, object>>
+    private readonly Dictionary<(Type, object), Func<IServiceProvider, object?, object>>
         _keyedScopedFactories;
 
     // Enumerable delegates
@@ -51,10 +50,10 @@ public sealed class ServiceProvider : IScopeProvider
 
         _singletonCache = new Dictionary<Type, object>();
         _keyedSingletonCache = new Dictionary<(Type, object), object>();
-        _transientFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
-        _keyedTransientFactories = new Dictionary<(Type, object), Func<IServiceProvider, object>>();
-        _scopedFactories = new Dictionary<Type, Func<IServiceProvider, object>>();
-        _keyedScopedFactories = new Dictionary<(Type, object), Func<IServiceProvider, object>>();
+        _transientFactories = new Dictionary<Type, Func<IServiceProvider, object?, object>>();
+        _keyedTransientFactories = new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
+        _scopedFactories = new Dictionary<Type, Func<IServiceProvider, object?, object>>();
+        _keyedScopedFactories = new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
 
         // scoped and transient only
         foreach (var ((serviceType, key), services) in compiled)
@@ -78,10 +77,11 @@ public sealed class ServiceProvider : IScopeProvider
             }
         }
 
-        // magic here
+        // this is for singletons
         foreach (var svc in singletonOrder)
         {
-            var instance = svc.Factory(this);
+            // CHANGED: Providing key of the service to the factory
+            var instance = svc.Factory(this, svc.Key);
 
             _singletonBySlot[svc.SlotId] = instance;
 
@@ -109,7 +109,7 @@ public sealed class ServiceProvider : IScopeProvider
                     if (_singletonBySlot.TryGetValue(svc.SlotId, out existing))
                         return existing;
 
-                    var instance = svc.Factory(this);
+                    var instance = svc.Factory(this, svc.Key);
                     _singletonBySlot[svc.SlotId] = instance;
                     if (instance is IDisposable d) _disposables.Add(d);
                     return instance;
@@ -120,7 +120,7 @@ public sealed class ServiceProvider : IScopeProvider
                     $"Cannot resolve scoped service '{svc.ServiceType}' from root provider.");
 
             case ServiceLifetimeType.Transient:
-                var t = svc.Factory(this);
+                var t = svc.Factory(this, svc.Key);
                 if (t is IDisposable td) _disposables.Add(td);
                 return t;
 
@@ -139,7 +139,7 @@ public sealed class ServiceProvider : IScopeProvider
 
         // Transient?
         if (_transientFactories.TryGetValue(serviceType, out var transientFactory))
-            return CreateAndTrack(transientFactory);
+            return CreateAndTrack(transientFactory, null);
 
         // Scoped? (exception)
         if (_scopedFactories.ContainsKey(serviceType))
@@ -177,7 +177,7 @@ public sealed class ServiceProvider : IScopeProvider
             return singleton;
 
         if (_keyedTransientFactories.TryGetValue((serviceType, key), out var transientFactory))
-            return CreateAndTrack(transientFactory);
+            return CreateAndTrack(transientFactory, key);
 
         if (_keyedScopedFactories.ContainsKey((serviceType, key)))
             throw new InvalidOperationException(
@@ -234,9 +234,9 @@ public sealed class ServiceProvider : IScopeProvider
         return svc;
     }
 
-    private object CreateAndTrack(Func<IServiceProvider, object> factory)
+    private object CreateAndTrack(Func<IServiceProvider, object?, object> factory, object? key)
     {
-        var instance = factory(this);
+        var instance = factory(this, key);
         if (instance is IDisposable disposable)
             _disposables.Add(disposable);
         return instance;
@@ -257,25 +257,25 @@ public sealed class ServiceProvider : IScopeProvider
     internal bool HasScopedFactory(Type type) =>
         _scopedFactories.ContainsKey(type);
 
-    internal Func<IServiceProvider, object> GetScopedFactory(Type type) =>
+    internal Func<IServiceProvider, object?, object> GetScopedFactory(Type type) =>
         _scopedFactories[type];
 
     internal bool HasTransientFactory(Type type) =>
         _transientFactories.ContainsKey(type);
 
-    internal Func<IServiceProvider, object> GetTransientFactory(Type type) =>
+    internal Func<IServiceProvider, object?, object> GetTransientFactory(Type type) =>
         _transientFactories[type];
 
     internal bool HasKeyedScopedFactory(Type type, object key) =>
         _keyedScopedFactories.ContainsKey((type, key));
 
-    internal Func<IServiceProvider, object> GetKeyedScopedFactory(Type type, object key) =>
+    internal Func<IServiceProvider, object?, object> GetKeyedScopedFactory(Type type, object key) =>
         _keyedScopedFactories[(type, key)];
 
     internal bool HasKeyedTransientFactory(Type type, object key) =>
         _keyedTransientFactories.ContainsKey((type, key));
 
-    internal Func<IServiceProvider, object> GetKeyedTransientFactory(Type type, object key) =>
+    internal Func<IServiceProvider, object?, object> GetKeyedTransientFactory(Type type, object key) =>
         _keyedTransientFactories[(type, key)];
 
     internal bool HasEnumerableFactory(Type type) =>

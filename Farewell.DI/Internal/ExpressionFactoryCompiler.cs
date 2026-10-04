@@ -6,10 +6,13 @@ namespace Farewell.DI.Internal;
 
 internal static class ExpressionFactoryCompiler
 {
-    public static Func<IServiceProvider, object> Compile(
+    // This compiles delegate-factory for provided implementation. Now we are coming with the simple rule -
+    // IMPLEMENTATION CANNOT KNOW THE KEY. The keyParam is only used to suit the API of the descriptor.
+    public static Func<IServiceProvider, object?, object> Compile(
         ConstructorInfo ctor, ParameterInfo[] parameters)
     {
         var spParam = Expression.Parameter(typeof(IServiceProvider), "sp");
+        var keyParam = Expression.Parameter(typeof(object), "key");
         var args = new Expression[parameters.Length];
 
         var getServiceMethod = typeof(IServiceProvider)
@@ -41,11 +44,6 @@ internal static class ExpressionFactoryCompiler
         }
 
         var body = Expression.Convert(Expression.New(ctor, args), typeof(object));
-        return Expression.Lambda<Func<IServiceProvider, object>>(body, spParam).Compile();
-    }
-
-    public static Func<IServiceProvider, object> Compile(ConstructorInfo ctor)
-    {
-        return Compile(ctor, ctor.GetParameters());
+        return Expression.Lambda<Func<IServiceProvider, object?, object>>(body, spParam, keyParam).Compile();
     }
 }
