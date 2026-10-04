@@ -5,12 +5,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Infrastructure;
 
-public abstract class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQueryableRepository<TEntity, TUniqueKey>
+public class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQueryableRepository<TEntity, TUniqueKey>
     where TEntity : DomainEntity<TUniqueKey>
     where TUniqueKey : IComparable<TUniqueKey>
 {
-    public virtual DbContext Context => context;
-    public virtual DbSet<TEntity> DbSet { get; } = context.Set<TEntity>();
+    public DbContext Context => context;
+    public DbSet<TEntity> DbSet { get; } = context.Set<TEntity>();
     
     public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(context);
     
