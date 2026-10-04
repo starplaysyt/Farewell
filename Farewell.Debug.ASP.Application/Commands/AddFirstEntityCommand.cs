@@ -10,7 +10,7 @@ public record AddFirstEntityCommand : Command
     public string? Field2 { get; init; }
 }
 
-public class AddFirstEntityHandler(IQueryableRepository<FirstDomainEntity, uint> repo) : AsyncHandler<AddFirstEntityCommand>
+public class AddFirstEntityHandler(IQueryableRepository<FirstDomainEntity> repo) : AsyncHandler<AddFirstEntityCommand>
 {
     public override async Task<OperationResult> HandleAsync(AddFirstEntityCommand command, CancellationToken cancellationToken = default)
     {

@@ -5,6 +5,6 @@ using Farewell.Infrastructure;
 namespace Farewell.Debug.TestInfrastructureRepositories;
 
 public class TestAEntityRepository(TestDbContext context) 
-    : EFRepository<TestAEntity, uint>(context), ITestAEntityRepository
+    : EFRepository<TestAEntity>(context), ITestAEntityRepository
 {
 }

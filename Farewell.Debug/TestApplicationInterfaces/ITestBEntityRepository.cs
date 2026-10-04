@@ -3,6 +3,6 @@ using Farewell.Debug.TestEntities;
 
 namespace Farewell.Debug.TestApplicationInterfaces;
 
-public interface ITestBEntityRepository : IQueryableRepository<TestBEntity, uint>
+public interface ITestBEntityRepository : IQueryableRepository<TestBEntity>
 {
 }

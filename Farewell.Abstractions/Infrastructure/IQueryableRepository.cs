@@ -3,9 +3,8 @@ using Farewell.Abstractions.Domain;
 
 namespace Farewell.Abstractions.Infrastructure;
 
-public interface IQueryableRepository<TEntity, TUniqueKey>
-    where TEntity : DomainEntity<TUniqueKey>
-    where TUniqueKey : IComparable<TUniqueKey>
+public interface IQueryableRepository<TEntity>
+    where TEntity : DomainEntity
 {
     IQueryable<TEntity> GetQuery();
     

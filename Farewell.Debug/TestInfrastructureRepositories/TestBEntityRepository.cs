@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Debug.TestInfrastructureRepositories;
 
-public class TestBEntityRepository(DbContext context) : EFRepository<TestBEntity, uint>(context), ITestBEntityRepository
+public class TestBEntityRepository(DbContext context) : EFRepository<TestBEntity>(context), ITestBEntityRepository
 {
     
 }

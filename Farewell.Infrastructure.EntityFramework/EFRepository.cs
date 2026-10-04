@@ -5,17 +5,24 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Infrastructure;
 
-public class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQueryableRepository<TEntity, TUniqueKey>
-    where TEntity : DomainEntity<TUniqueKey>
-    where TUniqueKey : IComparable<TUniqueKey>
+public class EFRepository<TEntity> : IQueryableRepository<TEntity>
+    where TEntity : DomainEntity
 {
-    public DbContext Context => context;
-    public DbSet<TEntity> DbSet { get; } = context.Set<TEntity>();
+    public DbContext Context { get; }
+    public DbSet<TEntity> DbSet { get; }
     
-    public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(context);
+    public EFRepository(DbContext context)
+    {
+        ArgumentNullException.ThrowIfNull(context);
+        
+        Context = context;
+        DbSet = context.Set<TEntity>();
+    }
+    
+    public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(Context);
     
     public Task SaveChangesAsync(CancellationToken ct = default) => 
-        context.SaveChangesAsync(ct);
+        Context.SaveChangesAsync(ct);
 
     public IQueryable<TEntity> GetQuery() => DbSet.AsNoTracking();
 
@@ -135,7 +142,7 @@ public class EFRepository<TEntity, TUniqueKey>(DbContext context) : IQueryableRe
     {
         var result = 0;
         if (UpdateMapHasChangesChecker<TUpdateMap>.Compiled.Invoke(updateMap))
-            result = await query.ExecuteUpdateAsync(UpdateSetterGenerator<TEntity, TUniqueKey, TUpdateMap>.Compiled.Invoke(updateMap), ct);
+            result = await query.ExecuteUpdateAsync(UpdateSetterGenerator<TEntity, TUpdateMap>.Compiled.Invoke(updateMap), ct);
         return result;
     }
 
