@@ -32,6 +32,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Farewell.Compatibility", "F
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Compatibility.MS.DependencyInjection", "Farewell.Compatibility.MS.DependencyInjection\Farewell.Compatibility.MS.DependencyInjection.csproj", "{F157DF8B-AF0F-462B-B01E-9AB15083B2FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Logging", "Farewell.Logging\Farewell.Logging.csproj", "{E7522040-9A7A-496F-A086-70D113A2D0E9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.StateRules", "Farewell.StateRules\Farewell.StateRules.csproj", "{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -90,6 +94,14 @@ Global
 		{F157DF8B-AF0F-462B-B01E-9AB15083B2FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F157DF8B-AF0F-462B-B01E-9AB15083B2FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F157DF8B-AF0F-462B-B01E-9AB15083B2FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7522040-9A7A-496F-A086-70D113A2D0E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7522040-9A7A-496F-A086-70D113A2D0E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7522040-9A7A-496F-A086-70D113A2D0E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7522040-9A7A-496F-A086-70D113A2D0E9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68} = {C4F80CC9-34E2-4847-8456-FDFCCF9CDDDB}
