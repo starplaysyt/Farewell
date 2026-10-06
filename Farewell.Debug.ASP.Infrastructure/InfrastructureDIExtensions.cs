@@ -11,6 +11,7 @@ public static class InfrastructureDIExtensions
 {
     public static IServiceBuilder AddInfrastructure(this IServiceBuilder serviceBuilder)
     {
+        serviceBuilder.AddDefaultDbContext<AppDbContext>();
         serviceBuilder.AddGenericRepositories();
 
         var serviceCollection = serviceBuilder.GetServiceCollection();

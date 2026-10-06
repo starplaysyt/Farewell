@@ -5,13 +5,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Infrastructure;
 
-public class EFRepository<TEntity> : IQueryableRepository<TEntity>
+public class EFRepository<TEntity>(DbContext context) : EFRepository<TEntity, DbContext>(context)
+    where TEntity : DomainEntity;
+
+public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
     where TEntity : DomainEntity
+    where TContext : DbContext
 {
     public DbContext Context { get; }
     public DbSet<TEntity> DbSet { get; }
     
-    public EFRepository(DbContext context)
+    public EFRepository(TContext context)
     {
         ArgumentNullException.ThrowIfNull(context);
         

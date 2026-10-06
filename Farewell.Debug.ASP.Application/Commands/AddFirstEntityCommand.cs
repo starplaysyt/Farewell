@@ -16,6 +16,7 @@ public class AddFirstEntityHandler(IQueryableRepository<FirstDomainEntity> repo)
     {
         await repo.AddAsync(new FirstDomainEntity()
             { Field1 = command.Field1 ?? "zeroData", Field2 = command.Field2 ?? "zeroData" }, cancellationToken);
+        await repo.SaveChangesAsync(cancellationToken);
 
         return new OperationResult(200, "Success");
     }
