@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.DI;
+using Farewell.Abstractions.Extensions;
 using Farewell.DI.Internal;
 
 namespace Farewell.DI;
@@ -53,6 +54,9 @@ public sealed class ServiceBuilder : IServiceBuilder
 
     public IScopeProvider Build()
     {
+        // Adding provider to be accessed from any service
+        this.AddScoped<IServiceProvider>(sp => sp);
+        
         // Separating opened and closed generics - different pipeline
         var (openGenericDescriptors, allClosed) = SeparateAndExpand();
 
