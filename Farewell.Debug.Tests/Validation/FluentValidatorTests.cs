@@ -1,167 +1,210 @@
+﻿using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
 
 public sealed class FluentValidatorTests
 {
-    private readonly UserValidator _validator = new();
-
     [Fact]
-    public void ValidateAll_ValidUser_ReturnsOk()
+    public async Task ValidateAllAsync_ValidUser_ReturnsOk()
     {
-        var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
-        var report = _validator.ValidateAll(user);
-        Assert.True(report.IsSuccess);
-    }
-
-    [Fact]
-    public void ValidateAll_InvalidUser_ReturnsErrors()
-    {
-        var user = new User { Name = "", Email = "notanemail", Age = 200 };
-        var report = _validator.ValidateAll(user);
-        Assert.False(report.IsSuccess);
-    }
-
-    [Fact]
-    public void ValidateAll_CollectsAllErrors()
-    {
-        var user = new User { Name = "", Email = "bad", Age = 200 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Equal(ValidationCode.MultipleErrors, report.Status);
-        Assert.NotNull(report.Errors);
-        Assert.True(report.Errors!.Count > 1);
-    }
-
-    [Fact]
-    public void ValidateAll_NameEmpty_ReturnsNotEmpty()
-    {
-        var user = new User { Name = "", Email = "john@mail.com", Age = 25 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.NotEmpty, PropertyName: nameof(User.Name) });
-    }
-
-    [Fact]
-    public void ValidateAll_NameTooShort_ReturnsMinLength()
-    {
-        var user = new User { Name = "J", Email = "john@mail.com", Age = 25 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.MinLength, PropertyName: nameof(User.Name) });
-    }
-
-    [Fact]
-    public void ValidateAll_NameTooLong_ReturnsMaxLength()
-    {
-        var user = new User { Name = new string('a', 51), Email = "john@mail.com", Age = 25 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.MaxLength, PropertyName: nameof(User.Name) });
-    }
-
-    [Fact]
-    public void ValidateAll_InvalidEmail_ReturnsInvalidFormat()
-    {
-        var user = new User { Name = "John", Email = "notanemail", Age = 25 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.InvalidFormat, PropertyName: nameof(User.Email) });
-    }
-
-    [Fact]
-    public void ValidateAll_AgeOutOfRange_ReturnsOutOfRange()
-    {
-        var user = new User { Name = "John", Email = "john@mail.com", Age = 200 };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.OutOfRange, PropertyName: nameof(User.Age) });
-    }
-
-    [Fact]
-    public void ValidateBreak_ValidUser_ReturnsOk()
-    {
-        var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
-        var status = _validator.ValidateBreak(user);
-        Assert.True(status.IsSuccess);
-    }
-
-    [Fact]
-    public void ValidateBreak_InvalidUser_ReturnsFirstError()
-    {
-        var user = new User { Name = "", Email = "bad", Age = 200 };
-        var status = _validator.ValidateBreak(user);
-        Assert.False(status.IsSuccess);
-    }
-
-    [Fact]
-    public void ValidateBreak_ReturnsOnlyOneError()
-    {
-        var user = new User { Name = "", Email = "bad", Age = 200 };
-        var status = _validator.ValidateBreak(user);
-
-        // ValidateBreak returns one status
-        Assert.IsType<ValidationStatus>(status);
-    }
-
-    [Fact]
-    public void Validator_CompilesOnce_ReturnsSameResult()
-    {
-        var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
-
-        var report1 = _validator.ValidateAll(user);
-        var report2 = _validator.ValidateAll(user);
-
-        Assert.Equal(report1.IsSuccess, report2.IsSuccess);
-        Assert.Equal(report1.Status, report2.Status);
-    }
-
-    [Fact]
-    public void When_ConditionFalse_SkipsConstraints()
-    {
-        // HasPhone = false - rules for phone are not passes
-        var user = new User { Name = "John", Email = "john@mail.com", Age = 25, HasPhone = false };
-        var report = _validator.ValidateAll(user);
-        Assert.True(report.IsSuccess);
-    }
-
-    [Fact]
-    public void When_ConditionTrue_AppliesConstraints()
-    {
-        // HasPhone = true, Phone is empty - error
-        var user = new User
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
         {
-            Name = "John",
-            Email = "john@mail.com",
-            Age = 25,
-            HasPhone = true,
-            Phone = null
-        };
-        var report = _validator.ValidateAll(user);
-
-        Assert.Contains(report.Errors!, e =>
-            e.PropertyName == nameof(User.Phone));
+            var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Assert.True(report.IsSuccess);
+        }
     }
 
     [Fact]
-    public void When_ConditionTrue_InvalidFormat_ReturnsError()
+    public async Task ValidateAllAsync_InvalidUser_CollectsAllErrors()
     {
-        var user = new User
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
         {
-            Name = "John",
-            Email = "john@mail.com",
-            Age = 25,
-            HasPhone = true,
-            Phone = "12345"
-        };
-        var report = _validator.ValidateAll(user);
+            var user = new User { Name = "", Email = "bad", Age = 200 };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
 
-        Assert.Contains(report.Errors!, e =>
-            e is { Code: ValidationCode.InvalidFormat, PropertyName: nameof(User.Phone) });
+            Assert.False(report.IsSuccess);
+            Assert.Equal(ValidationCode.MultipleErrors, report.Status);
+            Assert.True(report.Errors!.Count >= 3);
+        }
+    }
+
+    [Fact]
+    public async Task ValidateFirstAsync_InvalidUser_ReturnsFirstErrorOnly()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User { Name = "", Email = "bad", Age = 200 };
+            var report = await provider.ValidateFirstAsync(user, ct: TestContext.Current.CancellationToken);
+
+            Assert.False(report.IsSuccess);
+            Assert.Single(report.Errors!);
+        }
+    }
+
+    [Fact]
+    public async Task Context_Default_UsesDefaultValidator()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User { Name = "Jo", Email = "j@m.co", Age = 25 };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Assert.True(report.IsSuccess);
+        }
+    }
+
+    [Fact]
+    public async Task Context_Create_UsesCreateValidator()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User { Name = "Jo" };
+            var report = await provider.ValidateAllAsync(user, "Create", TestContext.Current.CancellationToken);
+            Assert.False(report.IsSuccess);
+            Assert.Equal(ValidationCode.MinLength, report.Status);
+        }
+    }
+
+    [Fact]
+    public async Task When_ConditionFalse_SkipsRules()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User
+            {
+                Name = "John", Email = "j@m.co", Age = 25,
+                HasPhone = false, Phone = null
+            };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Assert.True(report.IsSuccess);
+        }
+    }
+
+    [Fact]
+    public async Task When_ConditionTrue_AppliesRules()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User
+            {
+                Name = "John", Email = "j@m.co", Age = 25,
+                HasPhone = true, Phone = null
+            };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Assert.False(report.IsSuccess);
+            Assert.Contains(report.Errors!, e => e.PropertyName == nameof(User.Phone));
+        }
+    }
+
+    [Fact]
+    public async Task When_ConditionTrue_InvalidFormat()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User
+            {
+                Name = "John", Email = "j@m.co", Age = 25,
+                HasPhone = true, Phone = "12345"
+            };
+            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Assert.Contains(report.Errors!, e =>
+                e.PropertyName == nameof(User.Phone) &&
+                e.Code == ValidationCode.InvalidFormat);
+        }
+    }
+
+    [Fact]
+    public async Task DynamicConstraint_ReadsConfigFromSp()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider(s =>
+        {
+            s.AddSingleton<IAppConfig>((_) => new TestAppConfig
+            {
+                MinNameLength = 10,
+                MaxNameLength = 100
+            });
+        });
+
+        using (scope)
+        {
+            var user = new User { Name = "Short" };
+            var report = await provider.ValidateAllAsync(user, "Dynamic", TestContext.Current.CancellationToken);
+
+            Assert.False(report.IsSuccess);
+            Assert.Equal(ValidationCode.MinLength, report.Status);
+        }
+    }
+
+    [Fact]
+    public async Task DynamicConstraint_PassesWhenConfigAllows()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider(s =>
+        {
+            s.AddSingleton<IAppConfig>((_) => new TestAppConfig
+            {
+                MinNameLength = 2,
+                MaxNameLength = 100
+            });
+        });
+
+        using (scope)
+        {
+            var user = new User { Name = "Good" };
+            var report = await provider.ValidateAllAsync(user, "Dynamic", TestContext.Current.CancellationToken);
+            Assert.True(report.IsSuccess);
+        }
+    }
+
+    [Fact]
+    public async Task FluentValidator_IsSingleton_CompilesOnce()
+    {
+        var root = ProviderFactory.BuildServices();
+        
+        IFluentValidator<User> v1, v2;
+
+        using (var scope = root.CreateScope())
+            v1 = scope.GetRequiredKeyedService<IAsyncValidator<User>>("Default")
+                as IFluentValidator<User> ?? throw new InvalidOperationException();
+
+        using (var scope = root.CreateScope())
+            v2 = scope.GetRequiredKeyedService<IAsyncValidator<User>>("Default")
+                as IFluentValidator<User> ?? throw new InvalidOperationException();
+
+        Assert.Same(v1, v2);
+    }
+    
+
+    [Fact]
+    public void ValidateAll_Sync_Works()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
+            var report = provider.ValidateAll(user);
+            Assert.True(report.IsSuccess);
+        }
+    }
+
+    [Fact]
+    public void ValidateFirst_Sync_Works()
+    {
+        var (scope, provider) = ProviderFactory.CreateProvider();
+        using (scope)
+        {
+            var user = new User { Name = "", Email = "bad", Age = 200 };
+            var report = provider.ValidateFirst(user);
+            Assert.False(report.IsSuccess);
+            Assert.Single(report.Errors!);
+        }
     }
 }

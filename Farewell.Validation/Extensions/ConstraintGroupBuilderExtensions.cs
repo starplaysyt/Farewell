@@ -19,7 +19,7 @@ public static class ConstraintGroupBuilderExtensions
             => builder.MinLength(min).MaxLength(max);
 
         public ConstraintGroupBuilder<T, string?> Matches(string pattern)
-            => builder.Must(new StringConstraints.InvalidFormatConstraint(pattern));
+            => builder.Must(new StringConstraints.MatchesConstraint(pattern));
     }
 
     public static ConstraintGroupBuilder<T, TValue> InRange<T, TValue>(

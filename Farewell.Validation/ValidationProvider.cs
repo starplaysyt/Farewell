@@ -1,61 +1,38 @@
-using System.Collections.Concurrent;
+using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
+using Farewell.Validation.Collectors;
 
 namespace Farewell.Validation;
 
-public sealed class ValidationProvider(IValidatorResolver resolver) : IValidationProvider
+public sealed class ValidationProvider : IValidationProvider
 {
-    private readonly ConcurrentDictionary<(Type, string), object?> _fluentCache = new();
-    
-    private readonly ConcurrentDictionary<(Type, string), object?> _directCache = new();
+    private readonly IServiceProvider _sp;
+
+    public ValidationProvider(IServiceProvider sp) => _sp = sp;
+
+    public ValueTask<ValidationReport> ValidateAsync<T>(
+        T instance,
+        IValidationCollector collector,
+        string context = "Default",
+        CancellationToken ct = default)
+    {
+        var validator = _sp.GetRequiredKeyedService<IAsyncValidator<T>>(context);
+        return validator.ValidateAsync(instance, _sp, collector, ct);
+    }
+
+    public ValueTask<ValidationReport> ValidateAllAsync<T>(
+        T instance, string context = "Default", CancellationToken ct = default)
+        => ValidateAsync(instance, new CollectAllCollector(), context, ct);
+
+    public ValueTask<ValidationReport> ValidateFirstAsync<T>(
+        T instance, string context = "Default", CancellationToken ct = default)
+        => ValidateAsync(instance, new BreakOnFirstCollector(), context, ct);
 
     public ValidationReport ValidateAll<T>(T instance, string context = "Default")
-    {
-        var validator = Resolve<T>(context);
-        return validator is null
-            ? ValidationReport.Ok
-            : validator.ValidateAll(instance);
-    }
+        => ValidateAllAsync(instance, context)
+            .ConfigureAwait(false).GetAwaiter().GetResult();
 
-    public ValidationStatus ValidateBreak<T>(T instance, string context = "Default")
-    {
-        var validator = Resolve<T>(context);
-        return validator is null
-            ? ValidationStatus.Ok
-            : validator.ValidateBreak(instance);
-    }
-
-    public void InvalidateCache() => _fluentCache.Clear();
-
-    private IValidator<T>? Resolve<T>(string context)
-    {
-        var key = (typeof(T), context);
-        
-        if (_directCache.TryGetValue(key, out var direct))
-            return (IValidator<T>?)direct;
-        
-        if (_fluentCache.TryGetValue(key, out var cached))
-            return (IValidator<T>?)cached;
-        
-        var resolved = resolver.Resolve<T>(context);
-
-        switch (resolved)
-        {
-            case IDirectValidator<T> directValidator:
-                _directCache[key] = directValidator;
-                return directValidator;
-
-            case IFluentValidator<T> fluentValidator:
-                var compiled = fluentValidator is FluentValidator<T> fv
-                    ? fv.GetOrCompile()
-                    : null;
-                _fluentCache[key] = compiled;
-                return compiled;
-
-            default:
-                // Validator not found - caching
-                _fluentCache[key] = null;
-                return null;
-        }
-    }
+    public ValidationReport ValidateFirst<T>(T instance, string context = "Default")
+        => ValidateFirstAsync(instance, context)
+            .ConfigureAwait(false).GetAwaiter().GetResult();
 }

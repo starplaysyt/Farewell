@@ -2,19 +2,33 @@ using Farewell.Abstractions.Validation;
 
 namespace Farewell.Validation.Internal;
 
-internal sealed class CompiledValidator<T> : IValidator<T>
+internal sealed class CompiledValidator<T>
 {
-    private readonly Func<T, ValidationReport> _validateAll;
-    private readonly Func<T, ValidationStatus> _validateBreak;
+    private readonly Func<T, IServiceProvider, CancellationToken, ValueTask<ValidationStatus?>>[] _evaluators;
 
     internal CompiledValidator(
-        Func<T, ValidationReport> validateAll,
-        Func<T, ValidationStatus> validateBreak)
+        Func<T, IServiceProvider, CancellationToken, ValueTask<ValidationStatus?>>[] evaluators)
     {
-        _validateAll = validateAll;
-        _validateBreak = validateBreak;
+        _evaluators = evaluators;
     }
 
-    public ValidationReport ValidateAll(T instance) => _validateAll(instance);
-    public ValidationStatus ValidateBreak(T instance) => _validateBreak(instance);
+    public async ValueTask<ValidationReport> ValidateAsync(
+        T instance,
+        IServiceProvider sp,
+        IValidationCollector collector,
+        CancellationToken ct)
+    {
+        foreach (var evaluator in _evaluators)
+        {
+            ct.ThrowIfCancellationRequested();
+
+            var status = await evaluator(instance, sp, ct).ConfigureAwait(false);
+            if (status is null) continue;
+
+            if (!collector.Collect(status))
+                break;
+        }
+
+        return collector.ToReport();
+    }
 }

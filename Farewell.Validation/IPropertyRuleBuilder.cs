@@ -4,5 +4,5 @@ namespace Farewell.Validation;
 
 internal interface IPropertyRuleBuilder<in T>
 {
-    Func<T, ValidationStatus?> BuildEvaluator();
+    Func<T, IServiceProvider, CancellationToken, ValueTask<ValidationStatus?>> BuildEvaluator();
 }

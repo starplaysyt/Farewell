@@ -1,8 +1,12 @@
 namespace Farewell.Abstractions.Attributes.Validation;
 
-[AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, AllowMultiple = true)]
-public class ValidatedByAttribute(Type validatorType, string context = "Default") : Attribute
+/// <summary>
+/// Defines context of current validator, ex. "Creation" or "Update".
+/// It is proposed to move context names to const strings.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = false)]
+public sealed class ValidationContextAttribute : Attribute
 {
-    public Type ValidatorType { get; } = validatorType;
-    public string Context { get; } = context;
+    public string Context { get; }
+    public ValidationContextAttribute(string context) => Context = context;
 }

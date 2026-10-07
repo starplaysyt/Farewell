@@ -3,7 +3,7 @@ using Farewell.Abstractions.Validation;
 
 namespace Farewell.Validation;
 
-public sealed class PropertiesValidatorBuilder<T>
+public sealed class PropertiesValidatorBuilder<T> 
 {
     private readonly List<IPropertyRuleBuilder<T>> _builders = new();
 
@@ -17,10 +17,9 @@ public sealed class PropertiesValidatorBuilder<T>
         return builder;
     }
 
-    internal Func<T, ValidationStatus?>[] BuildEvaluators()
-        => _builders
-            .Select(b => b.BuildEvaluator())
-            .ToArray();
+    internal Func<T, IServiceProvider, CancellationToken, ValueTask<ValidationStatus?>>[]
+        BuildEvaluators()
+        => _builders.Select(b => b.BuildEvaluator()).ToArray();
 
     private static string ExtractName<TValue>(Expression<Func<T, TValue>> expr)
         => expr.Body switch

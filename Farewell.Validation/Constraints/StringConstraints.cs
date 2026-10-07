@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 using Farewell.Abstractions.Validation;
 
@@ -8,37 +10,40 @@ public static class StringConstraints
     public sealed class NotEmptyConstraint : IValidationConstraint<string?>
     {
         public ValidationCode Code => ValidationCode.NotEmpty;
-        public bool Check(string? value) => !string.IsNullOrWhiteSpace(value);
+
+        public ValueTask<bool> CheckAsync(string? value, IServiceProvider _, CancellationToken __)
+            => new(!string.IsNullOrWhiteSpace(value));
     }
 
-    public sealed class MinLengthConstraint : IValidationConstraint<string?>
+    public sealed class MinLengthConstraint(Func<IServiceProvider, int> min)
+        : IValidationConstraint<string?>
     {
-        private readonly int _min;
         public ValidationCode Code => ValidationCode.MinLength;
 
-        public MinLengthConstraint(int min) => _min = min;
+        public MinLengthConstraint(int min) : this(_ => min) { }
 
-        public bool Check(string? value) => value is not null && value.Length >= _min;
+        public ValueTask<bool> CheckAsync(string? value, IServiceProvider sp, CancellationToken _)
+            => new(value is not null && value.Length >= min(sp));
     }
 
-    public sealed class MaxLengthConstraint : IValidationConstraint<string?>
+    public sealed class MaxLengthConstraint(Func<IServiceProvider, int> max)
+        : IValidationConstraint<string?>
     {
-        private readonly int _max;
         public ValidationCode Code => ValidationCode.MaxLength;
 
-        public MaxLengthConstraint(int max) => _max = max;
+        public MaxLengthConstraint(int max) : this(_ => max) { }
 
-        public bool Check(string? value) => value is null || value.Length <= _max;
+        public ValueTask<bool> CheckAsync(string? value, IServiceProvider sp, CancellationToken _)
+            => new(value is null || value.Length <= max(sp));
     }
 
-    public sealed class InvalidFormatConstraint : IValidationConstraint<string?>
+    public sealed class MatchesConstraint(
+        [StringSyntax(StringSyntaxAttribute.Regex)] string pattern) : IValidationConstraint<string?>
     {
-        private readonly Regex _regex;
+        private readonly Regex _regex = new(pattern, RegexOptions.Compiled);
         public ValidationCode Code => ValidationCode.InvalidFormat;
 
-        public InvalidFormatConstraint(string pattern)
-            => _regex = new Regex(pattern, RegexOptions.Compiled);
-
-        public bool Check(string? value) => value is not null && _regex.IsMatch(value);
+        public ValueTask<bool> CheckAsync(string? value, IServiceProvider _, CancellationToken __)
+            => new(value is not null && _regex.IsMatch(value));
     }
 }

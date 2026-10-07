@@ -8,8 +8,6 @@ public sealed class ValidationStatus(ValidationCode code, string propertyName)
     public string PropertyName { get; } = propertyName;
     public bool IsSuccess => Code == ValidationCode.Ok;
 
-    public static ValidationStatus Error(ValidationCode code, string propertyName) =>
-        new(code, propertyName);
-
-    public override string ToString() => $"{PropertyName} : {Code}";
+    public static ValidationStatus Error(ValidationCode code, string propertyName)
+        => new(code, propertyName);
 }

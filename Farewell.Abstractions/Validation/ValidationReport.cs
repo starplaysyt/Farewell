@@ -6,8 +6,7 @@ public sealed class ValidationReport(ValidationStatus[]? errors)
 
     public ValidationCode Status { get; } = errors?.Length switch
     {
-        null => ValidationCode.Ok,
-        0 => ValidationCode.Ok,
+        null or 0 => ValidationCode.Ok,
         1 => errors[0].Code,
         _ => ValidationCode.MultipleErrors
     };
