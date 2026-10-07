@@ -1,4 +1,6 @@
-﻿namespace Farewell.StateRules;
+﻿using Farewell.Abstractions.StateRules;
+
+namespace Farewell.StateRules;
 
 public sealed class StateRulesValidationException : AggregateException
 {

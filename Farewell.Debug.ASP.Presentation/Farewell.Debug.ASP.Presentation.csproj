@@ -8,7 +8,17 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Farewell.Compatibility.MS.DependencyInjection\Farewell.Compatibility.MS.DependencyInjection.csproj" />
+      <ProjectReference Include="..\Farewell.Compatibility.MS.Logging\Farewell.Compatibility.MS.Logging.csproj" />
       <ProjectReference Include="..\Farewell.Debug.ASP.Infrastructure\Farewell.Debug.ASP.Infrastructure.csproj" />
+      <ProjectReference Include="..\Farewell.Logging\Farewell.Logging.csproj" />
+      <ProjectReference Include="..\Farewell.StateRules\Farewell.StateRules.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.12">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      </PackageReference>
     </ItemGroup>
 
 </Project>
