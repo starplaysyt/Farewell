@@ -1,0 +1,115 @@
+name: Publish NuGet Packages to GitHub Packages
+
+on:
+  push:
+    tags:
+      - 'v[0-9]*.[0-9]*.[0-9]*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+          source-url: https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        env:
+          NUGET_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract version from tag
+        shell: bash
+        run: |
+          TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          echo "PACKAGE_VERSION=${TAG#v}" >> $GITHUB_ENV
+
+      - name: Build
+        run: dotnet build -c Release
+
+      - name: Pack
+        run: dotnet pack -c Release --no-build -p:PackageVersion=${{ env.PACKAGE_VERSION }} -o ./packages
+
+      - name: Push to GitHub Packages
+        run: dotnet nuget push ./packages/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+
+      - name: Publish and Zip each project
+        shell: bash
+        run: |
+          mkdir -p ./release-archives
+
+          for proj in $(find . -name "*.csproj" -not -path "*/bin/*" -not -path "*/obj/*"); do
+            if grep -qi "<IsPackable>\s*false\s*</IsPackable>" "$proj"; then
+              echo "⏭  Skipping $proj (IsPackable=false)"
+              continue
+            fi
+
+            PROJ_NAME=$(basename "$proj" .csproj)
+            echo "Publishing $PROJ_NAME ..."
+
+            dotnet publish "$proj" -c Release --no-build -o "./publish/$PROJ_NAME"
+
+            cd "./publish/$PROJ_NAME"
+            zip -r "../../release-archives/${PROJ_NAME}-${{ env.PACKAGE_VERSION }}.zip" ./*
+            cd ../..
+
+            echo "$PROJ_NAME done"
+          done
+
+          echo "Archives created:"
+          ls -la ./release-archives/
+
+      - name: Generate changelog
+        id: changelog
+        shell: bash
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+        
+          if [ -z "$PREV_TAG" ]; then
+            RANGE="v${{ env.PACKAGE_VERSION }}"
+          else
+            RANGE="${PREV_TAG}..v${{ env.PACKAGE_VERSION }}"
+          fi
+        
+          {
+            echo "body<<CHANGELOG_EOF"
+            echo "## What's Changed"
+            echo ""
+        
+            for HASH in $(git log --pretty=format:"%h" $RANGE); do
+              FULL=$(git log -1 --pretty=format:"%B" "$HASH")
+              
+              SUBJECT=$(echo "$FULL" | head -n 1)
+              
+              BODY=$(echo "$FULL" | tail -n +2 | sed '/^$/d')
+        
+              echo "- $SUBJECT ($HASH)"
+              if [ -n "$BODY" ]; then
+                echo '```'
+                echo "$BODY"
+                echo '```'
+              fi
+              echo ""
+            done
+        
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ env.PACKAGE_VERSION }}"
+            echo "CHANGELOG_EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ env.PACKAGE_VERSION }}
+          name: Release v${{ env.PACKAGE_VERSION }}
+          body: ${{ steps.changelog.outputs.body }}
+          files: |
+            ./release-archives/*.zip
