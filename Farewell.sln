@@ -36,6 +36,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Logging", "Farewel
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.StateRules", "Farewell.StateRules\Farewell.StateRules.csproj", "{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Farewell.Compatibility.MS.Logging", "Farewell.Compatibility.MS.Logging\Farewell.Compatibility.MS.Logging.csproj", "{F47113A8-4C19-4075-87E8-2BEDFDF275DB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -102,6 +104,10 @@ Global
 		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD1BEBC1-1399-47CF-A6DC-53877D5F57C0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F47113A8-4C19-4075-87E8-2BEDFDF275DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F47113A8-4C19-4075-87E8-2BEDFDF275DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F47113A8-4C19-4075-87E8-2BEDFDF275DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F47113A8-4C19-4075-87E8-2BEDFDF275DB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{F8EED0B6-073E-4637-B7B5-DC4867DBCA68} = {C4F80CC9-34E2-4847-8456-FDFCCF9CDDDB}
@@ -111,5 +117,6 @@ Global
 		{76D8CE8B-AF07-44FF-8D2A-57922BD1511B} = {C81D20F7-707A-4234-9F7C-A8A00BF749B9}
 		{20E3D93C-9E6C-4C0E-A259-3361B0159C72} = {C81D20F7-707A-4234-9F7C-A8A00BF749B9}
 		{F157DF8B-AF0F-462B-B01E-9AB15083B2FF} = {87EC1C4B-5EAA-45A0-857B-E0A6359D9B64}
+		{F47113A8-4C19-4075-87E8-2BEDFDF275DB} = {87EC1C4B-5EAA-45A0-857B-E0A6359D9B64}
 	EndGlobalSection
 EndGlobal
