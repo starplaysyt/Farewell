@@ -5,6 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Farewell.Abstractions</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>starplays</Authors>
+        <Description>Farewell.Abstractions</Description>
+        <RepositoryUrl>https://github.com/starplaysyt/Farewell</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
 </Project>

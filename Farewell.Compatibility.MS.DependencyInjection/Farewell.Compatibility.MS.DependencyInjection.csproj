@@ -4,6 +4,11 @@
         <TargetFramework>net10.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <Authors>starplaysyt</Authors>
+        <Description>Farewell.Compatibility.MS.DependencyInjection</Description>
+        <RepositoryUrl>https://github.com/starplaysyt/Farewell</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     </PropertyGroup>
 
     <ItemGroup>

@@ -5,6 +5,11 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>Farewell.Infrastructure</RootNamespace>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <Authors>starplaysyt</Authors>
+        <Description>Farewell.Infrastructure.EntityFramework</Description>
+        <RepositoryUrl>https://github.com/starplaysyt/Farewell</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>
