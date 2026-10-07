@@ -18,11 +18,39 @@ public static class ServiceBuilderExtensions
         builder.AddScoped<DbContext, TContext>();
         return builder;
     }
-    
+
+    public static IServiceBuilder AddDefaultDbContext<TContext>(
+        this IServiceBuilder builder,
+        Action<DbContextOptionsBuilder<TContext>> optionsAction) 
+        where TContext : DbContext
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+        optionsAction(optionsBuilder);
+        
+        builder.AddSingleton((_) => optionsBuilder.Options);
+        builder.AddScoped<DbContext, TContext>();
+
+        return builder;
+    }
+
     public static IServiceBuilder AddDbContext<TContext>(this IServiceBuilder builder)
         where TContext : DbContext
     {
         builder.AddScoped<TContext>();
+        return builder;
+    }
+    
+    public static IServiceBuilder AddDbContext<TContext>(
+        this IServiceBuilder builder,
+        Action<DbContextOptionsBuilder<TContext>> optionsAction) 
+        where TContext : DbContext
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
+        optionsAction(optionsBuilder);
+        
+        builder.AddSingleton((_) => optionsBuilder.Options);
+        builder.AddScoped<TContext>();
+
         return builder;
     }
 
@@ -34,8 +62,8 @@ public static class ServiceBuilderExtensions
     /// <typeparam name="TContext">Selected DbContext</typeparam>
     /// <returns></returns>
     public static IServiceBuilder AddDefaultRepository<TEntity, TContext>(
-        this IServiceBuilder builder) 
-        where TEntity : DomainEntity 
+        this IServiceBuilder builder)
+        where TEntity : DomainEntity
         where TContext : DbContext
     {
         builder.AddScoped<IQueryableRepository<TEntity>, EFRepository<TEntity, TContext>>();
@@ -48,7 +76,7 @@ public static class ServiceBuilderExtensions
     /// <param name="builder"></param>
     /// <typeparam name="TEntity"></typeparam>
     /// <returns></returns>
-    public static IServiceBuilder AddDefaultRepository<TEntity>(this IServiceBuilder builder) 
+    public static IServiceBuilder AddDefaultRepository<TEntity>(this IServiceBuilder builder)
         where TEntity : DomainEntity
     {
         builder.AddScoped<IQueryableRepository<TEntity>, EFRepository<TEntity, DbContext>>();
@@ -62,7 +90,8 @@ public static class ServiceBuilderExtensions
     /// <typeparam name="TEntity"></typeparam>
     /// <typeparam name="TImplementation"></typeparam>
     /// <returns></returns>
-    public static IServiceBuilder AddQueryableRepository<TEntity, TImplementation>(this IServiceBuilder builder) 
+    public static IServiceBuilder AddQueryableRepository<TEntity, TImplementation>(
+        this IServiceBuilder builder)
         where TEntity : DomainEntity
         where TImplementation : class, IQueryableRepository<TEntity>
     {
@@ -79,13 +108,14 @@ public static class ServiceBuilderExtensions
     /// <returns></returns>
     public static IServiceBuilder AddRepository<TRepository, TImplementation>(
         this IServiceBuilder builder)
-        where TImplementation : class, 
-        TRepository where TRepository : class
+        where TImplementation : class,
+        TRepository
+        where TRepository : class
     {
         builder.AddScoped<TRepository, TImplementation>();
         return builder;
     }
-    
+
     /// <summary>
     /// Adds generic-implemented repositories, can be called from services as IQueryableRepository&ltTEntity&gt.
     /// AddDefaultDbContext call required - all generic repositories will be connected to default DbContext
@@ -94,9 +124,9 @@ public static class ServiceBuilderExtensions
     /// <returns></returns>
     public static IServiceBuilder AddGenericRepositories(this IServiceBuilder builder)
     {
-        builder.AddService(typeof(IQueryableRepository<>), typeof(EFRepository<>), 
+        builder.AddService(typeof(IQueryableRepository<>), typeof(EFRepository<>),
             ServiceLifetimeType.Scoped);
-        
+
         return builder;
     }
 
@@ -135,7 +165,7 @@ public static class ServiceBuilderExtensions
         builder.AddScoped<TService, TImplementation>();
         return builder;
     }
-    
+
     /// <summary>
     /// Adds CreateOrMigrate rule to the default DbContext.
     /// AddDefaultDbContext should be used to define that default DbContext.
@@ -154,26 +184,26 @@ public static class ServiceBuilderExtensions
     /// <param name="builder">The IServiceBuilder</param>
     /// <typeparam name="TContext">The DbContext</typeparam>
     /// <returns></returns>
-    public static IServiceBuilder AddCreateOrMigrateRule<TContext>(this IServiceBuilder builder) 
+    public static IServiceBuilder AddCreateOrMigrateRule<TContext>(this IServiceBuilder builder)
         where TContext : DbContext
     {
         builder.AddStateRule<CreateOrMigrateRule>((sp) =>
             new CreateOrMigrateRule(sp.GetRequiredService<TContext>()));
-        
+
         return builder;
     }
-    
+
     /// <summary>
     /// Adds custom CreateOrMigrate rule to provided DbContext.
     /// </summary>
     /// <param name="builder"></param>
     /// <typeparam name="TRule"></typeparam>
     /// <returns></returns>
-    public static IServiceBuilder AddCustomCreateOrMigrateRule<TRule>(this IServiceBuilder builder) 
+    public static IServiceBuilder AddCustomCreateOrMigrateRule<TRule>(this IServiceBuilder builder)
         where TRule : CreateOrMigrateRule
     {
         builder.AddStateRule<TRule>();
-        
+
         return builder;
     }
 }
