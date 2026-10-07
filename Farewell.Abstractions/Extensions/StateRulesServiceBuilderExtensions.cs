@@ -1,7 +1,7 @@
 ﻿using Farewell.Abstractions.DI;
-using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.StateRules;
 
-namespace Farewell.Abstractions.StateRules;
+namespace Farewell.Abstractions.Extensions;
 
 public sealed record StateRuleFailure(string RuleName, Exception Exception);
 
