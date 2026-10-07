@@ -4,7 +4,6 @@ using Farewell.Abstractions.Domain;
 namespace Farewell.Abstractions.Infrastructure;
 
 public interface IQueryableRepository<TEntity>
-    where TEntity : DomainEntity
 {
     IQueryable<TEntity> GetQuery();
     

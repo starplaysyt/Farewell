@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Query;
 namespace Farewell.Infrastructure;
 
 public static class UpdateSetterGenerator<TEntity, TUpdateMap>
-    where TEntity : DomainEntity
+    where TEntity : class
 {
     private static readonly MethodInfo SetPropertyDefinition = ResolveSetPropertyDefinition();
 
