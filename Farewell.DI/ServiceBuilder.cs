@@ -56,6 +56,7 @@ public sealed class ServiceBuilder : IServiceBuilder
     {
         // Adding provider to be accessed from any service
         this.AddScoped<IServiceProvider>(sp => sp);
+        this.AddSingleton<IScopeProvider>(sp => (IScopeProvider)sp);
         
         // Separating opened and closed generics - different pipeline
         var (openGenericDescriptors, allClosed) = SeparateAndExpand();

@@ -74,6 +74,15 @@ public class Program
 {
     public static void Main(string[] args)
     {
+        var builder = new ServiceBuilder();
+
+        builder.AddSingleton<SingletonService>();
+
+        var provider = builder.Build();
+        
+        provider.GetRequiredService<SingletonService>().DoSomeStuff();
+        
+
         // ServiceBuilder serviceBuilder = new ServiceBuilder();
         // serviceBuilder.AddKeyedSingleton<ITestContext, TestImplementationA>("A");
         // serviceBuilder.AddKeyedSingleton<ITestContext, TestImplementationA>("B");

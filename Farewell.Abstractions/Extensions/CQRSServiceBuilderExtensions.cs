@@ -6,11 +6,11 @@ namespace Farewell.Abstractions.Extensions;
 
 public static class CQRSServiceBuilderExtensions
 {
+    public static IServiceBuilder AddSingletonMediator(this IServiceBuilder builder)
+        => builder.AddSingleton<SingletonMediator>();
+    
     public static IServiceBuilder AddMediator(this IServiceBuilder builder)
-    {
-        builder.AddScoped<Mediator>();
-        return builder;
-    }
+        => builder.AddScoped<Mediator>();
     
     public static IServiceBuilder AddCQRSHandlers(this IServiceBuilder services, Assembly assembly)
     {
