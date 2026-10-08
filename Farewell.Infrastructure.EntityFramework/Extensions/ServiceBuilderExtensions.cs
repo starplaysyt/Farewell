@@ -27,6 +27,8 @@ public static class ServiceBuilderExtensions
         var optionsBuilder = new DbContextOptionsBuilder<TContext>();
         optionsAction(optionsBuilder);
         
+        DesignDbContextFactory<TContext>.Options = optionsBuilder.Options;
+
         builder.AddSingleton((_) => optionsBuilder.Options);
         builder.AddScoped<DbContext, TContext>();
 

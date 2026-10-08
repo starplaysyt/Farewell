@@ -15,11 +15,11 @@ public class CreateOrMigrateRule(DbContext context, ILogger? logger = null) : IS
 {
     public async Task<bool> ValidateAsync(CancellationToken cancellationToken = default)
     {
-        var isBaseExists = await context.Database.CanConnectAsync(cancellationToken);
+        var isBaseExists = await context.Database.CanConnectAsync(cancellationToken).ConfigureAwait(false);
 
         if (isBaseExists)
         {
-            await context.Database.MigrateAsync(cancellationToken);
+            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             return true;
         }
         
@@ -27,12 +27,12 @@ public class CreateOrMigrateRule(DbContext context, ILogger? logger = null) : IS
 
         if (context.Database.GetMigrations().Any())
         {
-            await context.Database.MigrateAsync(cancellationToken);
+            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
             logger?.LogInfo("Database created through migrations.");
             return false;
         }
 
-        await context.Database.EnsureCreatedAsync(cancellationToken);
+        await context.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
         logger?.LogInfo("Database created through EnsureCreated.");
 
         return false;

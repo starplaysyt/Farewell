@@ -18,10 +18,12 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
 
     public EFRepository(TContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
-
-        Context = context;
+        Context = context ?? throw new InvalidOperationException("Given TContext is null.");
         DbSet = context.Set<TEntity>();
+
+        if (DbSet is null)
+            throw new InvalidOperationException(
+                $"Unable to get DbSet for given entity {typeof(TEntity).FullName} from context {typeof(TContext).FullName}");
     }
 
     public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(Context);
@@ -32,7 +34,7 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
     public IQueryable<TEntity> GetQuery() => DbSet.AsNoTracking();
 
     public async Task<TEntity> AddAsync(TEntity entity, CancellationToken ct = default) =>
-        (await DbSet.AddAsync(entity, ct)).Entity;
+        (await DbSet.AddAsync(entity, ct).ConfigureAwait(false)).Entity;
 
     public Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken ct = default) =>
         DbSet.AddRangeAsync(entities, ct);
@@ -179,7 +181,7 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
         var result = 0;
         if (UpdateMapHasChangesChecker<TUpdateMap>.Compiled.Invoke(updateMap))
             result = await query.ExecuteUpdateAsync(
-                UpdateSetterGenerator<TEntity, TUpdateMap>.Compiled.Invoke(updateMap), ct);
+                UpdateSetterGenerator<TEntity, TUpdateMap>.Compiled.Invoke(updateMap), ct).ConfigureAwait(false);
         return result;
     }
 
