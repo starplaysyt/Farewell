@@ -82,16 +82,4 @@ public sealed class DIRegistrationTests
 
         Assert.NotSame(p1, p2);
     }
-
-    [Fact]
-    public void MissingValidator_ThrowsOnResolve()
-    {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
-        {
-            var entity = new UnvalidatedEntity();
-            Assert.ThrowsAny<InvalidOperationException>(() =>
-                provider.ValidateAll(entity));
-        }
-    }
 }

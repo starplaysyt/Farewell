@@ -181,30 +181,4 @@ public sealed class FluentValidatorTests
 
         Assert.Same(v1, v2);
     }
-    
-
-    [Fact]
-    public void ValidateAll_Sync_Works()
-    {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
-        {
-            var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
-            var report = provider.ValidateAll(user);
-            Assert.True(report.IsSuccess);
-        }
-    }
-
-    [Fact]
-    public void ValidateFirst_Sync_Works()
-    {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
-        {
-            var user = new User { Name = "", Email = "bad", Age = 200 };
-            var report = provider.ValidateFirst(user);
-            Assert.False(report.IsSuccess);
-            Assert.Single(report.Errors!);
-        }
-    }
 }

@@ -27,12 +27,4 @@ public sealed class ValidationProvider : IValidationProvider
     public ValueTask<ValidationReport> ValidateFirstAsync<T>(
         T instance, string context = "Default", CancellationToken ct = default)
         => ValidateAsync(instance, new BreakOnFirstCollector(), context, ct);
-
-    public ValidationReport ValidateAll<T>(T instance, string context = "Default")
-        => ValidateAllAsync(instance, context)
-            .ConfigureAwait(false).GetAwaiter().GetResult();
-
-    public ValidationReport ValidateFirst<T>(T instance, string context = "Default")
-        => ValidateFirstAsync(instance, context)
-            .ConfigureAwait(false).GetAwaiter().GetResult();
 }

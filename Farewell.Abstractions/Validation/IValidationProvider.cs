@@ -17,7 +17,4 @@ public interface IValidationProvider
         T instance,
         string context = "Default",
         CancellationToken ct = default);
-
-    ValidationReport ValidateAll<T>(T instance, string context = "Default");
-    ValidationReport ValidateFirst<T>(T instance, string context = "Default");
 }
