@@ -3,61 +3,87 @@ using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Domain;
 using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Infrastructure;
-using Farewell.Abstractions.StateRules;
-using Farewell.Infrastructure.Rules;
 using Microsoft.EntityFrameworkCore;
 
 namespace Farewell.Infrastructure.Extensions;
 
-public static class ServiceBuilderExtensions
+public static class ServiceBuilderRepositoryExtensions
 {
-    // INFO: Probably there is better way of adding DBContext to DI
-    public static IServiceBuilder AddDefaultDbContext<TContext>(this IServiceBuilder builder)
+    #region Auto Adders
+
+    /// <summary>
+    /// Adds <c>IQueryableRepository&lt;TEntity&gt;</c> for every reflected DomainEntity(TEntity) in
+    /// specified assembly and namespace with specified <c>DbContext</c>.
+    /// If namespace is not specified, will look through all assembly.
+    /// </summary>
+    /// <param name="builder">Provided <c>IServiceBuilder</c>.</param>
+    /// <param name="assembly">Assembly to perform search.</param>
+    /// <param name="namespace">Entities namespace to lookup.</param>
+    /// <param name="includeNestedNamespaces">Do nested types search.</param>
+    /// <param name="logAdded">Do log added repositories.</param>
+    /// <typeparam name="TContext">Specific DbContext for created repositories.</typeparam>
+    /// <returns>Provided <c>IServiceBuilder</c>.</returns>
+    public static IServiceBuilder AddAutoRepositories<TContext>(this IServiceBuilder builder,
+        Assembly assembly, string? @namespace = null,
+        bool includeNestedNamespaces = false, bool logAdded = false)
         where TContext : DbContext
     {
-        builder.AddScoped<DbContext, TContext>();
-        return builder;
-    }
+        var types = assembly.GetTypes();
 
-    public static IServiceBuilder AddDefaultDbContext<TContext>(
-        this IServiceBuilder builder,
-        Action<DbContextOptionsBuilder<TContext>> optionsAction) 
-        where TContext : DbContext
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        optionsAction(optionsBuilder);
-        
-        DesignDbContextFactory<TContext>.Options = optionsBuilder.Options;
+        var selectedTypes =
+            types.Where(t =>
+                t is { IsClass: true, IsAbstract: false } && t.IsSubclassOf(typeof(DomainEntity)));
 
-        builder.AddSingleton((_) => optionsBuilder.Options);
-        builder.AddScoped<DbContext, TContext>();
+        var domainCheck = @namespace == null
+            ? selectedTypes
+            : includeNestedNamespaces
+                ? selectedTypes.Where(t => t.Namespace?.StartsWith(@namespace) ?? false)
+                : selectedTypes.Where(t => t.Namespace == @namespace);
 
-        return builder;
-    }
+        var foundEntities = domainCheck.ToArray();
+        var queryableType = typeof(IQueryableRepository<>);
+        var efRepositoryType = typeof(EFRepository<,>);
+        var contextType = typeof(TContext);
 
-    public static IServiceBuilder AddDbContext<TContext>(this IServiceBuilder builder)
-        where TContext : DbContext
-    {
-        builder.AddScoped<TContext>();
-        return builder;
-    }
-    
-    public static IServiceBuilder AddDbContext<TContext>(
-        this IServiceBuilder builder,
-        Action<DbContextOptionsBuilder<TContext>> optionsAction) 
-        where TContext : DbContext
-    {
-        var optionsBuilder = new DbContextOptionsBuilder<TContext>();
-        optionsAction(optionsBuilder);
-        
-        builder.AddSingleton((_) => optionsBuilder.Options);
-        builder.AddScoped<TContext>();
+        foreach (var entityType in foundEntities)
+        {
+            var genericEntityType = queryableType.MakeGenericType(entityType);
+            var genericRepoType = efRepositoryType.MakeGenericType(entityType, contextType);
+
+            builder.AddScoped(genericEntityType, genericRepoType);
+
+            if (logAdded)
+                Console.WriteLine("[AddAutoRepositories] Adding Repository {0}<{1}> of type {2}<{3}, {4}>",
+                    genericEntityType.Name, entityType.Name, efRepositoryType.Name, entityType.Name, contextType.Name);
+        }
 
         return builder;
     }
 
     /// <summary>
-    /// Adds default-implemented repository for TEntity with manually selected DbContext.
+    /// Adds <c>IQueryableRepository&lt;TEntity&gt;</c> for every reflected DomainEntity(TEntity) in
+    /// specified assembly and namespace with <c>DbContext</c> context. That one can be registered with
+    /// <c>AddDefaultDbContext</c> method.
+    /// If namespace is not specified, will look through all assembly.
+    /// </summary>
+    /// <param name="builder">Provided <c>IServiceBuilder</c>.</param>
+    /// <param name="assembly">Assembly to perform search.</param>
+    /// <param name="namespace">Entities namespace to lookup.</param>
+    /// <param name="includeNestedNamespaces">Do nested types search.</param>
+    /// <param name="logAdded">Do log added repositories.</param>
+    /// <returns>Provided <c>IServiceBuilder</c>.</returns>
+    public static IServiceBuilder AddAutoRepositories(this IServiceBuilder builder,
+        Assembly assembly, string? @namespace = null,
+        bool includeNestedNamespaces = false, bool logAdded = false)
+        => builder.AddAutoRepositories<DbContext>(assembly, @namespace: @namespace,
+            includeNestedNamespaces: includeNestedNamespaces, logAdded);
+
+    #endregion
+
+    #region Generic Repositories
+
+    /// <summary>
+    /// Adds default <c>IQueryableRepository</c> for specific TEntity with manually selected DbContext.
     /// </summary>
     /// <param name="builder">Service builder</param>
     /// <typeparam name="TEntity">Entity type</typeparam>
@@ -71,6 +97,9 @@ public static class ServiceBuilderExtensions
         builder.AddScoped<IQueryableRepository<TEntity>, EFRepository<TEntity, TContext>>();
         return builder;
     }
+
+    #endregion
+
 
     /// <summary>
     /// Adds default-implemented repository for TEntity, connected to the default DbContext.
@@ -165,47 +194,6 @@ public static class ServiceBuilderExtensions
         where TImplementation : EFRepository<TEntity>, TService
     {
         builder.AddScoped<TService, TImplementation>();
-        return builder;
-    }
-
-    /// <summary>
-    /// Adds CreateOrMigrate rule to the default DbContext.
-    /// AddDefaultDbContext should be used to define that default DbContext.
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <returns></returns>
-    public static IServiceBuilder AddCreateOrMigrateRule(this IServiceBuilder builder)
-    {
-        builder.AddStateRule<CreateOrMigrateRule>();
-        return builder;
-    }
-
-    /// <summary>
-    /// Adds CreateOrMigrate rule to provided DbContext.
-    /// </summary>
-    /// <param name="builder">The IServiceBuilder</param>
-    /// <typeparam name="TContext">The DbContext</typeparam>
-    /// <returns></returns>
-    public static IServiceBuilder AddCreateOrMigrateRule<TContext>(this IServiceBuilder builder)
-        where TContext : DbContext
-    {
-        builder.AddStateRule<CreateOrMigrateRule>((sp) =>
-            new CreateOrMigrateRule(sp.GetRequiredService<TContext>()));
-
-        return builder;
-    }
-
-    /// <summary>
-    /// Adds custom CreateOrMigrate rule to provided DbContext.
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <typeparam name="TRule"></typeparam>
-    /// <returns></returns>
-    public static IServiceBuilder AddCustomCreateOrMigrateRule<TRule>(this IServiceBuilder builder)
-        where TRule : CreateOrMigrateRule
-    {
-        builder.AddStateRule<TRule>();
-
         return builder;
     }
 }

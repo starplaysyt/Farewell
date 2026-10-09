@@ -2,6 +2,8 @@
 using Farewell.Abstractions.Logging;
 using Farewell.Abstractions.StateRules;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Farewell.Infrastructure.Rules;
 
@@ -13,31 +15,62 @@ namespace Farewell.Infrastructure.Rules;
 /// <param name="context">The DbContext connected to this rule</param>
 public class CreateOrMigrateRule(DbContext context, ILogger? logger = null) : IStateRule
 {
-    public async Task<bool> ValidateAsync(CancellationToken cancellationToken = default)
+        public async Task<bool> ValidateAsync(CancellationToken cancellationToken = default)
     {
-        var isBaseExists = await context.Database.CanConnectAsync(cancellationToken).ConfigureAwait(false);
-
-        if (isBaseExists)
-        {
-            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-            return true;
-        }
+        var databaseCreator = context.Database.GetService<IRelationalDatabaseCreator>();
         
-        logger?.LogInfo("Creating new database...");
-
-        if (context.Database.GetMigrations().Any())
+        var hasMigrations = context.Database.GetMigrations().Any();
+        
+        var dbExists = await databaseCreator.ExistsAsync(cancellationToken).ConfigureAwait(false);
+        if (!dbExists)
         {
-            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
-            logger?.LogInfo("Database created through migrations.");
+            logger?.LogWarn($"Database for context {context.GetType().FullName} does not exist.", "CreateOrMigrateRule");
             return false;
         }
+        
+        if (hasMigrations)
+        {
+            var pendingMigrations = await context.Database
+                .GetPendingMigrationsAsync(cancellationToken)
+                .ConfigureAwait(false);
 
-        await context.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
-        logger?.LogInfo("Database created through EnsureCreated.");
+            if (pendingMigrations.Any())
+            {
+                logger?.LogWarn($"Database for context {context.GetType().FullName} exists, but has pending migrations.", "CreateOrMigrateRule");
+                return false;
+            }
+        }
+        else
+        {
+            var hasTables = await databaseCreator.HasTablesAsync(cancellationToken).ConfigureAwait(false);
+            if (!hasTables)
+            {
+                logger?.LogWarn($"Database file for context {context.GetType().FullName} exists, but it is empty (no tables).", "CreateOrMigrateRule");
+                return false;
+            }
+        }
 
-        return false;
+        logger?.LogInfo($"Database for context {context.GetType().FullName} state is valid and up-to-date.", "CreateOrMigrateRule");
+        return true;
     }
 
-    public virtual Task TryFixAsync(CancellationToken cancellationToken = default)
-        => Task.CompletedTask;
+    public async Task TryFixAsync(CancellationToken cancellationToken = default)
+    {
+        logger?.LogInfo($"Attempting to fix database for context {context.GetType().FullName} state...", "CreateOrMigrateRule");
+        
+        var hasMigrations = context.Database.GetMigrations().Any();
+
+        if (hasMigrations)
+        {
+            logger?.LogInfo("Applying migrations...");
+            await context.Database.MigrateAsync(cancellationToken).ConfigureAwait(false);
+        }
+        else
+        {
+            logger?.LogInfo("No migrations found. Creating database tables using EnsureCreated...", "CreateOrMigrateRule");
+            await context.Database.EnsureCreatedAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        logger?.LogInfo($"Database state for context {context.GetType().FullName} successfully fixed.", "CreateOrMigrateRule");
+    }
 }
