@@ -7,6 +7,9 @@ public class FarewellBuilder(IServiceCollection collection) : IServiceBuilder
 {
     public IServiceCollection ServiceCollection => collection;
     
+    public bool IsRegistered(Type serviceType)
+        => collection.Any(d => d.ServiceType == serviceType);
+    
     public IServiceBuilder AddService(Type serviceType, Func<IServiceProvider, object> implementationFactory,
         ServiceLifetimeType lifetime, object? key = null)
     {

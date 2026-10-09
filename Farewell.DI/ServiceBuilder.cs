@@ -10,6 +10,9 @@ public sealed class ServiceBuilder : IServiceBuilder
 
     internal IReadOnlyList<ServiceDescriptor> Descriptors => _descriptors;
 
+    public bool IsRegistered(Type serviceType)
+        => _descriptors.Any(d => d.ServiceType == serviceType);
+
     public ServiceBuilder AddService(ServiceDescriptor descriptor)
     {
         ArgumentNullException.ThrowIfNull(descriptor);
