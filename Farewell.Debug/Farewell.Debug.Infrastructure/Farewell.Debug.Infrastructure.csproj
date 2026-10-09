@@ -8,6 +8,8 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Farewell.Infrastructure.EntityFramework\Farewell.Infrastructure.EntityFramework.csproj" />
+      <ProjectReference Include="..\..\Farewell.Logging\Farewell.Logging.csproj" />
+      <ProjectReference Include="..\..\Farewell.StateRules\Farewell.StateRules.csproj" />
       <ProjectReference Include="..\Farewell.Debug.Application\Farewell.Debug.Application.csproj" />
     </ItemGroup>
 

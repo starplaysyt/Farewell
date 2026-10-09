@@ -1,0 +1,54 @@
+x-generator: NSwag v14.7.1.0 (NJsonSchema v11.6.1.0 (Newtonsoft.Json v13.0.0.0))
+swagger: 2.0
+info:
+  title: My Title
+  version: 1.0.0
+host: localhost:5146
+schemes:
+- http
+paths:
+  /api/workers/add:
+    post:
+      operationId: FarewellDebugPresentationASPEndpointsTestingDataEndpointsAddNewWorkerEndpoint
+      consumes:
+      - application/json
+      parameters:
+      - name: AddNewWorkerRequest
+        in: body
+        required: true
+        description: ''
+        schema:
+          $ref: '#/definitions/AddNewWorkerRequest'
+        x-nullable: false
+      responses:
+        204:
+          description: ''
+  /api/test:
+    post:
+      operationId: FarewellDebugPresentationASPEndpointsTestingDataEndpointsTestEndpoint
+      produces:
+      - application/json
+      responses:
+        200:
+          x-nullable: false
+          description: ''
+          schema:
+            $ref: '#/definitions/TestEndpointResponse'
+definitions:
+  AddNewWorkerRequest:
+    type: object
+    required:
+    - name
+    - surname
+    properties:
+      name:
+        type: string
+      surname:
+        type: string
+  TestEndpointResponse:
+    type: object
+    required:
+    - result
+    properties:
+      result:
+        type: string

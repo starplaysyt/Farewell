@@ -75,7 +75,15 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Farewell.Compatibility\Farewell.Compatibility.MS.DependencyInjection\Farewell.Compatibility.MS.DependencyInjection.csproj" />
+      <ProjectReference Include="..\..\Farewell.Compatibility\Farewell.Compatibility.MS.Logging\Farewell.Compatibility.MS.Logging.csproj" />
+      <ProjectReference Include="..\..\Farewell.StateRules\Farewell.StateRules.csproj" />
       <ProjectReference Include="..\Farewell.Debug.Infrastructure\Farewell.Debug.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="FastEndpoints" Version="8.3.0" />
+      <PackageReference Include="FastEndpoints.Swagger" Version="8.3.0" />
     </ItemGroup>
 
 </Project>
