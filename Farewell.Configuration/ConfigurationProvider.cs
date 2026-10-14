@@ -12,7 +12,8 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
     private readonly IValidationProvider? _validationProvider;
     private volatile T _cached;
 
-    public ConfigurationProvider(string path, IConfigResolver resolver, IValidationProvider? validationProvider = null)
+    public ConfigurationProvider(string path, IConfigResolver resolver,
+        IValidationProvider? validationProvider = null)
     {
         _path = path;
         _resolver = resolver;
@@ -48,19 +49,21 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
         {
             throw new ConfigurationResolvingException(_path, ex);
         }
-        
+
         if (_validationProvider == null) return resolved;
 
-        var validationReport = _validationProvider.ValidateAll(resolved);
+        var validationReport = _validationProvider.ValidateAllAsync(resolved).AsTask()
+            .ConfigureAwait(false).GetAwaiter().GetResult();
 
-        return validationReport.IsSuccess ? resolved : 
-            throw new ConfigurationValidationException(validationReport);
+        return validationReport.IsSuccess
+            ? resolved
+            : throw new ConfigurationValidationException(validationReport);
     }
 
     private static void EnsureDirectoryExists(string filePath)
     {
         var directory = Path.GetDirectoryName(filePath);
-        
+
         if (!string.IsNullOrEmpty(directory))
             Directory.CreateDirectory(directory);
     }

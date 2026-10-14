@@ -4,7 +4,6 @@ namespace Farewell.Abstractions.CQRS;
 
 public abstract class SyncHandler<TRequest, TResult>
     where TRequest : IDTOComponent
-    where TResult : IDTOComponent
 {
     public abstract OperationResult<TResult> Handle(TRequest command);
 }

@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <IsPackable>false</IsPackable>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="coverlet.collector" Version="6.0.4"/>
+        <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1"/>
+        <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4"/>
+        <PackageReference Include="xunit.v3" Version="4.0.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Using Include="Xunit"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Farewell.Abstractions\Farewell.Abstractions.csproj" />
+      <ProjectReference Include="..\..\Farewell.Configuration\Farewell.Configuration.csproj" />
+      <ProjectReference Include="..\..\Farewell.DI\Farewell.DI.csproj" />
+      <ProjectReference Include="..\..\Farewell.Infrastructure.EntityFramework\Farewell.Infrastructure.EntityFramework.csproj" />
+      <ProjectReference Include="..\..\Farewell.Localization\Farewell.Localization.csproj" />
+      <ProjectReference Include="..\..\Farewell.Logging\Farewell.Logging.csproj" />
+      <ProjectReference Include="..\..\Farewell.StateRules\Farewell.StateRules.csproj" />
+      <ProjectReference Include="..\..\Farewell.Validation\Farewell.Validation.csproj" />
+    </ItemGroup>
+
+</Project>

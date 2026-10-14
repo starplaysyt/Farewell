@@ -14,7 +14,7 @@ public class Mediator(IServiceProvider serviceProvider)
         var service = serviceProvider.GetRequiredService<AsyncHandler<TOperation, TResult>>();
 
         return await service.HandleAsync(operation,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<OperationResult> HandleAsync<TOperation>(TOperation operation,
@@ -24,7 +24,7 @@ public class Mediator(IServiceProvider serviceProvider)
         var service = serviceProvider.GetRequiredService<AsyncHandler<TOperation>>();
 
         return await service.HandleAsync(operation,
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
     }
     
     public OperationResult<TResult> HandleWait<TOperation, TResult>(TOperation operation)

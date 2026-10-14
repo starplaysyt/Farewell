@@ -44,7 +44,7 @@ public static class UpdateSetterGenerator<TEntity, TUpdateMap>
         return outerLambda.Compile();
     }
 
-    private static Expression? BuildPropertyAssignment(
+    private static ConditionalExpression? BuildPropertyAssignment(
         PropertyInfo mapProperty,
         ParameterExpression updateMapParam,
         ParameterExpression builderParam)
