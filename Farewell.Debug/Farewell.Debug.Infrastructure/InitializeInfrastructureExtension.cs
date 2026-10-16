@@ -6,6 +6,7 @@ using Farewell.Debug.Domain;
 using Farewell.Debug.Infrastructure.Persistence;
 using Farewell.Infrastructure.Extensions;
 using Farewell.Logging;
+using Farewell.Mediator.Extensions;
 using Farewell.StateRules;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,8 +16,8 @@ public static class InitializeInfrastructureExtension
 {
     public static IServiceBuilder AddInfrastructure(this IServiceBuilder builder)
     {
-        builder.AddCQRSHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)), true);
         builder.AddMediator();
+        builder.AddMediatorHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)), true);
 
         builder.AddDefaultDbContext<DefaultDbContext>(options => 
             options.UseAutoConfigurations()

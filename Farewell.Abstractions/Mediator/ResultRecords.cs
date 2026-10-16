@@ -1,4 +1,4 @@
-namespace Farewell.Abstractions.CQRS;
+namespace Farewell.Abstractions.Mediator;
 
 public record OperationResult<T>(int Code, string Message, T? Result);
 

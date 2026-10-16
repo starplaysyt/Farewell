@@ -1,14 +1,13 @@
 ﻿using System.Net;
-using Farewell.Abstractions.CQRS;
+using Farewell.Abstractions.Mediator;
 using Farewell.Abstractions.Infrastructure;
 using Farewell.Debug.Domain.Entities.Company;
 
 namespace Farewell.Debug.Application.Commands;
 
-public record UpdateWorkerCommand(uint Id, WorkerEntityUpdateMap Map) : Command;
+public record UpdateWorkerCommand(uint Id, WorkerEntityUpdateMap Map) : Command<UpdateWorkerCommand>;
 
-public class UpdateWorkerCommandHandler(IQueryableRepository<WorkerEntity> repository)
-    : AsyncHandler<UpdateWorkerCommand>
+public class UpdateWorkerCommandHandler(IQueryableRepository<WorkerEntity> repository) : AsyncHandler<UpdateWorkerCommand>
 {
     public override async Task<OperationResult> HandleAsync(UpdateWorkerCommand command,
         CancellationToken cancellationToken = default)

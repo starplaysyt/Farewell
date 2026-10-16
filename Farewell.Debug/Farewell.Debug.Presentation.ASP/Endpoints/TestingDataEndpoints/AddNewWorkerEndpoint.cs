@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Farewell.Abstractions.CQRS;
+using Farewell.Abstractions.Mediator;
 using Farewell.Debug.Application.Commands;
 using FastEndpoints;
 
@@ -13,7 +13,7 @@ public class AddNewWorkerRequest
 
 public class AddNewWorkerEndpoint : Endpoint<AddNewWorkerRequest>
 {
-    public Mediator Mediator { get; set; }
+    public IMediator Mediator { get; set; }
     
     public override void Configure()
     {

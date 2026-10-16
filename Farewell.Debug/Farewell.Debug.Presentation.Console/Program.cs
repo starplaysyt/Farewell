@@ -1,6 +1,6 @@
-﻿using System.Reflection;
-using Farewell.Abstractions.CQRS;
-using Farewell.Abstractions.Extensions;
+﻿using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.Mediator;
+using Farewell.Debug.Application.Commands;
 using Farewell.Debug.Application.Queries;
 using Farewell.Debug.Infrastructure;
 using Farewell.DI;
@@ -21,6 +21,9 @@ public class Program
 
         // scope.GetService<AsyncHandler<TestQuery, ReturnDTO[]>>().HandleAsync(new TestQuery());
 
-        scope.GetService<Mediator>().HandleWait(new TestQuery());
+        var result = scope.GetRequiredService<IMediator>().HandleWait(new TestQuery());
+        var result2 = scope.GetRequiredService<IMediator>().HandleWait(new TestCommand("Test"));
+        var result3 = scope.GetRequiredService<IMediator>().HandleWait(new TestCommandWithoutResponse("Test"));
+        var result4 = scope.GetRequiredService<IMediator>().HandleWait(new TestQueryWithoutResponse());
     }
 }

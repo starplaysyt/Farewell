@@ -1,15 +1,17 @@
-﻿using Farewell.Abstractions.CQRS;
+﻿using Farewell.Abstractions.Mediator;
 
 namespace Farewell.Debug.Application.Queries;
 
-public record TestQuery : Query;
+public record TestQuery : Query<TestQuery, TestQueryResponse>;
 
-public record ReturnDTO;
+public record TestQueryResponse(string Test);
 
-public class TestQueryHandler : AsyncHandler<TestQuery, ReturnDTO[]>
+public class TestQueryHandler : AsyncHandler<TestQuery, TestQueryResponse>
 {
-    public override async Task<OperationResult<ReturnDTO[]>> HandleAsync(TestQuery command, CancellationToken cancellationToken = default)
+    public override async Task<OperationResult<TestQueryResponse>> HandleAsync(TestQuery operation,
+        CancellationToken cancellationToken = default)
     {
-        return null;
+        Console.WriteLine($"Query TestQuery complete!");
+        return new OperationResult<TestQueryResponse>(0, "", new TestQueryResponse("Test"));
     }
 }

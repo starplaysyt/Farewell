@@ -1,5 +1,5 @@
 ﻿using System.Net;
-using Farewell.Abstractions.CQRS;
+using Farewell.Abstractions.Mediator;
 using Farewell.Abstractions.Infrastructure;
 using Farewell.Debug.Domain.Entities.Company;
 
@@ -8,7 +8,7 @@ namespace Farewell.Debug.Application.Commands;
 public record AddNewWorkerCommand(
     string Name,
     string Surname
-    ) : Command;
+    ) : Command<AddNewWorkerCommand>;
 
 public class AddNewWorkerCommandHandler(IQueryableRepository<WorkerEntity> repository)
     : AsyncHandler<AddNewWorkerCommand>
