@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.DI;
+using Farewell.DI.Exceptions;
 
 namespace Farewell.DI.Internal;
 
@@ -18,10 +19,8 @@ internal static class GraphValidator
                     var depKey = svc.DependencyKeys[i];
 
                     if (!compiled.ContainsKey((depType, depKey)))
-                        throw new InvalidOperationException(
-                            $"Service '{serviceType}' (key: {key ?? "none"}) " +
-                            $"depends on '{depType}' (key: {depKey ?? "none"}), " +
-                            "which is not registered.");
+                        throw new DependencyValidationException(serviceType, key, depType, depKey,
+                            DIValidationExceptionType.NotRegistered);
                 }
             }
         }
@@ -76,9 +75,9 @@ internal static class GraphValidator
             foreach (var dep in deps)
             {
                 if (dep.Lifetime == ServiceLifetimeType.Scoped)
-                    throw new InvalidOperationException(
-                        $"Singleton '{current.ServiceType}' transitively depends on " +
-                        $"scoped service '{dep.ServiceType}'. Captive dependency.");
+                    throw new DependencyValidationException(current.ServiceType, current.Key,
+                        dep.ServiceType, dep.Key,
+                        DIValidationExceptionType.SingletonScopedCaptiveDependency);
 
                 ValidateNoScopedDependency(dep, compiled, checkedSet, path);
             }
@@ -94,8 +93,9 @@ internal static class GraphValidator
         HashSet<int> inProgress)
     {
         if (inProgress.Contains(current.SlotId))
-            throw new InvalidOperationException(
-                $"Circular dependency detected involving '{current.ServiceType}'.");
+            throw new DependencyValidationException(current.ServiceType, current.Key,
+                null!, null,
+                DIValidationExceptionType.CircularDependency);
 
         if (!visited.Add(current.SlotId)) return;
         inProgress.Add(current.SlotId);

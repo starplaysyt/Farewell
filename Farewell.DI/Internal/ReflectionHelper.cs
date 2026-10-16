@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Farewell.DI.Exceptions;
 
 namespace Farewell.DI.Internal;
 
@@ -13,16 +14,13 @@ internal class ReflectionHelper
 
     internal static ConstructorInfo GetSinglePublicConstructor(Type type)
     {
-        var ctors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
+        var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.Instance);
 
-        if (ctors.Length == 0)
-            throw new InvalidOperationException(
-                $"Type '{type.FullName}' has no public constructors.");
-        if (ctors.Length > 1)
-            throw new InvalidOperationException(
-                $"Type '{type.FullName}' has {ctors.Length} public constructors. " +
-                "Only one public constructor is allowed.");
-
-        return ctors[0];
+        return constructors.Length switch
+        {
+            0 => throw new NoPublicConstructorsException(type),
+            > 1 => throw new MultiplePublicConstructorsException(type, constructors.Length),
+            _ => constructors[0]
+        };
     }
 }

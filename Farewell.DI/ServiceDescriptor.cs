@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.DI;
+using Farewell.Abstractions.Exceptions;
 
 namespace Farewell.DI;
 
@@ -54,15 +55,14 @@ public sealed class ServiceDescriptor
         ArgumentNullException.ThrowIfNull(factory);
 
         if (serviceType.IsGenericTypeDefinition)
-            throw new ArgumentException(
-                "Factory registration is not supported for open generic types.",
-                nameof(serviceType));
+            throw new UnsupportedOperationException(
+                $"Factory registration is not supported for open generic types. Tried for {nameof(serviceType)}");
 
         return new ServiceDescriptor(serviceType, null, WrapFactory, lifetime, key);
 
         object WrapFactory(IServiceProvider provider, object? _) => factory(provider);
     }
-    
+
     public static ServiceDescriptor FromFactory(
         Type serviceType,
         Func<IServiceProvider, object?, object> factory,
@@ -73,9 +73,8 @@ public sealed class ServiceDescriptor
         ArgumentNullException.ThrowIfNull(factory);
 
         if (serviceType.IsGenericTypeDefinition)
-            throw new ArgumentException(
-                "Factory registration is not supported for open generic types.",
-                nameof(serviceType));
+            throw new UnsupportedOperationException(
+                $"Factory registration is not supported for open generic types. Tried for {nameof(serviceType)}");
 
         return new ServiceDescriptor(serviceType, null, factory, lifetime, key);
     }
@@ -90,9 +89,7 @@ public sealed class ServiceDescriptor
                 throw new ArgumentException(
                     $"Service type '{serviceType}' is an open generic, " +
                     $"but implementation '{implementationType}' is not.");
-
-            // There should be compatibility checks between two open-generics(service and impl),
-            // but I'm tired, go fuck something with these generics
+            
             return;
         }
 

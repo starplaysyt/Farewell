@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Reflection;
 using Farewell.Abstractions.DI;
+using Farewell.DI.Exceptions;
 using Farewell.DI.Internal;
 
 namespace Farewell.DI;
@@ -14,6 +15,7 @@ public sealed class ServiceProvider : IScopeProvider
 
     // Transient delegates
     private readonly Dictionary<Type, Func<IServiceProvider, object?, object>> _transientFactories;
+
     private readonly Dictionary<(Type, object), Func<IServiceProvider, object?, object>>
         _keyedTransientFactories;
 
@@ -51,9 +53,11 @@ public sealed class ServiceProvider : IScopeProvider
         _singletonCache = new Dictionary<Type, object>();
         _keyedSingletonCache = new Dictionary<(Type, object), object>();
         _transientFactories = new Dictionary<Type, Func<IServiceProvider, object?, object>>();
-        _keyedTransientFactories = new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
+        _keyedTransientFactories =
+            new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
         _scopedFactories = new Dictionary<Type, Func<IServiceProvider, object?, object>>();
-        _keyedScopedFactories = new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
+        _keyedScopedFactories =
+            new Dictionary<(Type, object), Func<IServiceProvider, object?, object>>();
 
         // scoped and transient only
         foreach (var ((serviceType, key), services) in compiled)
@@ -116,8 +120,8 @@ public sealed class ServiceProvider : IScopeProvider
                 }
 
             case ServiceLifetimeType.Scoped:
-                throw new InvalidOperationException(
-                    $"Cannot resolve scoped service '{svc.ServiceType}' from root provider.");
+                throw new ServiceResolvingException(svc.ServiceType, svc.Key,
+                    ServiceResolvingExceptionType.ScopedFromRoot);
 
             case ServiceLifetimeType.Transient:
                 var t = svc.Factory(this, svc.Key);
@@ -143,9 +147,8 @@ public sealed class ServiceProvider : IScopeProvider
 
         // Scoped? (exception)
         if (_scopedFactories.ContainsKey(serviceType))
-            throw new InvalidOperationException(
-                $"Cannot resolve scoped service '{serviceType}' from root provider. " +
-                "Create a scope first.");
+            throw new ServiceResolvingException(serviceType, null,
+                ServiceResolvingExceptionType.ScopedFromRoot);
 
         // IEnumerable?
         if (serviceType.IsGenericType &&
@@ -180,9 +183,8 @@ public sealed class ServiceProvider : IScopeProvider
             return CreateAndTrack(transientFactory, key);
 
         if (_keyedScopedFactories.ContainsKey((serviceType, key)))
-            throw new InvalidOperationException(
-                $"Cannot resolve keyed scoped service '{serviceType}' " +
-                $"(key: '{key}') from root provider.");
+            throw new ServiceResolvingException(serviceType, key,
+                ServiceResolvingExceptionType.ScopedFromRoot);
 
         return null;
     }
@@ -200,12 +202,11 @@ public sealed class ServiceProvider : IScopeProvider
             var genericDef = type.GetGenericTypeDefinition();
             var descriptor = _openGenericDescriptors
                 .FirstOrDefault(d => d.ServiceType == genericDef);
-            
+
             // CHANGED: This happens when we are trying to resolve generic service, but this service
             // IS NOT open generic service, and IS NOT registered directly.
             if (descriptor?.ImplementationType is null)
-                throw new InvalidOperationException(
-                    $"Unable to resolve service {closedType}, service not found.");
+                throw new GenericServiceNotFoundException(closedType);
 
             var closedImpl = descriptor.ImplementationType
                 .MakeGenericType(type.GetGenericArguments());
@@ -278,7 +279,8 @@ public sealed class ServiceProvider : IScopeProvider
     internal bool HasKeyedTransientFactory(Type type, object key) =>
         _keyedTransientFactories.ContainsKey((type, key));
 
-    internal Func<IServiceProvider, object?, object> GetKeyedTransientFactory(Type type, object key) =>
+    internal Func<IServiceProvider, object?, object>
+        GetKeyedTransientFactory(Type type, object key) =>
         _keyedTransientFactories[(type, key)];
 
     internal bool HasEnumerableFactory(Type type) =>

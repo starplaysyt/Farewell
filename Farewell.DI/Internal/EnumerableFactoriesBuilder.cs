@@ -1,4 +1,6 @@
-﻿namespace Farewell.DI.Internal;
+﻿using Farewell.DI.Exceptions;
+
+namespace Farewell.DI.Internal;
 
 internal static class EnumerableFactoriesBuilder
 {
@@ -29,8 +31,8 @@ internal static class EnumerableFactoriesBuilder
                     {
                         ServiceScope scope => scope.ResolveFromCompiledService(svcs[i]),
                         ServiceProvider prov => prov.ResolveFromCompiledService(svcs[i]),
-                        _ => throw new InvalidOperationException(
-                            "Enumerable resolution requires MyDI ServiceProvider or ServiceScope.")
+                        _ => throw new UnsuitableProviderException(
+                            "Enumerable resolution requires ServiceProvider or ServiceScope.")
                     };
                     typed.SetValue(instance, i);
                 }

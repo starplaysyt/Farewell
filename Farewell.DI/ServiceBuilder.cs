@@ -6,7 +6,7 @@ namespace Farewell.DI;
 
 public sealed class ServiceBuilder : IServiceBuilder
 {
-    private readonly List<ServiceDescriptor> _descriptors = new();
+    private readonly List<ServiceDescriptor> _descriptors = [];
 
     internal IReadOnlyList<ServiceDescriptor> Descriptors => _descriptors;
 
@@ -144,6 +144,6 @@ public sealed class ServiceBuilder : IServiceBuilder
             }
         }
 
-        return (openGeneric, closed.Concat(expanded).ToList());
+        return (openGeneric, [.. closed, .. expanded]);
     }
 }
