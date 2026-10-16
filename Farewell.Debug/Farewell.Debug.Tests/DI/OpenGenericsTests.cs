@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.DI;
+using Farewell.Abstractions.Exceptions;
 using Farewell.Abstractions.Extensions;
 using Farewell.DI;
 
@@ -99,7 +100,7 @@ public class OpenGenericTests
     [Fact]
     public void OpenGeneric_Factory_Throws()
     {
-        Assert.Throws<ArgumentException>(() =>
+        Assert.Throws<UnsupportedOperationException>(() =>
             ServiceDescriptor.FromFactory(
                 typeof(IRepository<>),
                 _ => new Repository<User>(),

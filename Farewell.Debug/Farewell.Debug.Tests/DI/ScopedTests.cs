@@ -1,6 +1,7 @@
 ﻿using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.DI;
+using Farewell.DI.Exceptions;
 
 namespace Farewell.Debug.Tests.DI;
 
@@ -40,7 +41,7 @@ public class ScopedTests
             .AddScoped<IServiceA, ServiceA>()
             .Build();
 
-        Assert.Throws<InvalidOperationException>(
+        Assert.Throws<ServiceResolvingException>(
             provider.GetService<IServiceA>);
     }
 

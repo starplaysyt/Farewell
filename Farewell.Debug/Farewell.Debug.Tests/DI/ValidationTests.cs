@@ -1,6 +1,7 @@
 ﻿using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.DI;
+using Farewell.DI.Exceptions;
 
 namespace Farewell.Debug.Tests.DI;
 
@@ -12,7 +13,7 @@ public class ValidationTests
         var builder = new ServiceBuilder()
             .AddSingleton<ServiceWithDependency>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<DependencyValidationException>(builder.Build);
     }
 
     [Fact]
@@ -22,7 +23,7 @@ public class ValidationTests
             .AddSingleton<CycleA>()
             .AddSingleton<CycleB>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<DependencyValidationException>(builder.Build);
     }
 
     [Fact]
@@ -31,7 +32,7 @@ public class ValidationTests
         var builder = new ServiceBuilder()
             .AddSingleton<SelfCycle>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<DependencyValidationException>(builder.Build);
     }
 
     [Fact]
@@ -41,7 +42,7 @@ public class ValidationTests
             .AddScoped<IScopedDep, ScopedDep>()
             .AddSingleton<SingletonWithScoped>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<DependencyValidationException>(builder.Build);
     }
 
     [Fact]
@@ -51,7 +52,7 @@ public class ValidationTests
             .AddSingleton<IServiceA, ServiceA>()
             .AddSingleton<MultipleConstructors>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<MultiplePublicConstructorsException>(builder.Build);
     }
 
     [Fact]
@@ -60,7 +61,7 @@ public class ValidationTests
         var builder = new ServiceBuilder()
             .AddSingleton<NoPublicConstructor>();
 
-        Assert.Throws<InvalidOperationException>(builder.Build);
+        Assert.Throws<NoPublicConstructorsException>(builder.Build);
     }
 
     [Fact]
