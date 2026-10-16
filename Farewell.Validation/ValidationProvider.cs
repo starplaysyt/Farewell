@@ -1,30 +1,31 @@
 using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
-using Farewell.Validation.Collectors;
 
 namespace Farewell.Validation;
 
-public sealed class ValidationProvider : IValidationProvider
+public sealed class ValidationProvider(IServiceProvider serviceProvider) : IValidationProvider
 {
-    private readonly IServiceProvider _sp;
-
-    public ValidationProvider(IServiceProvider sp) => _sp = sp;
-
-    public ValueTask<ValidationReport> ValidateAsync<T>(
+    public async ValueTask<ValidationReport> ValidateAsync<T>(
         T instance,
-        IValidationCollector collector,
         string context = "Default",
+        bool breakOnFirst = false,
         CancellationToken ct = default)
     {
-        var validator = _sp.GetRequiredKeyedService<IAsyncValidator<T>>(context);
-        return validator.ValidateAsync(instance, _sp, collector, ct);
+        var validator = serviceProvider.GetRequiredKeyedService<IAsyncValidator<T>>(context);
+        IValidationCollector collector = breakOnFirst
+            ? new BreakOnFirstCollector()
+            : new CollectAllCollector();
+
+        return await validator.ValidateAsync(instance, serviceProvider, collector, ct)
+            .ConfigureAwait(false);
     }
 
-    public ValueTask<ValidationReport> ValidateAllAsync<T>(
-        T instance, string context = "Default", CancellationToken ct = default)
-        => ValidateAsync(instance, new CollectAllCollector(), context, ct);
-
-    public ValueTask<ValidationReport> ValidateFirstAsync<T>(
-        T instance, string context = "Default", CancellationToken ct = default)
-        => ValidateAsync(instance, new BreakOnFirstCollector(), context, ct);
+    public ValidationReport Validate<T>(
+        T instance,
+        string context = "Default",
+        bool breakOnFirst = false)
+        => ValidateAsync(instance, context, breakOnFirst).AsTask()
+            .ConfigureAwait(false)
+            .GetAwaiter()
+            .GetResult();
 }

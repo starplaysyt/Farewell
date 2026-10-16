@@ -1,184 +1,185 @@
-﻿using Farewell.Abstractions.Extensions;
+﻿using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
 
-public sealed class FluentValidatorTests
+public sealed class FluentValidatorTests : IDisposable
 {
-    [Fact]
-    public async Task ValidateAllAsync_ValidUser_ReturnsOk()
+    private readonly IKeyedServiceProvider _scope;
+    private readonly IValidationProvider _provider;
+
+    public FluentValidatorTests()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        (_scope, _provider) = TestProviderFactory.Create();
+    }
+
+    public void Dispose() => _scope.Dispose();
+
+    [Fact]
+    public async Task ValidUser_DefaultContext_Passes()
+    {
+        var user = new User
         {
-            var user = new User { Name = "John", Email = "john@mail.com", Age = 25 };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
-            Assert.True(report.IsSuccess);
-        }
+            Name = "Alice",
+            Email = "alice@example.com",
+            Age = 30
+        };
+
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.True(report.IsSuccess);
     }
 
     [Fact]
-    public async Task ValidateAllAsync_InvalidUser_CollectsAllErrors()
+    public async Task EmptyName_DefaultContext_Fails()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User { Name = "", Email = "bad", Age = 200 };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
+            Name = "",
+            Email = "alice@example.com"
+        };
 
-            Assert.False(report.IsSuccess);
-            Assert.Equal(ValidationCode.MultipleErrors, report.Status);
-            Assert.True(report.Errors!.Count >= 3);
-        }
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.NotEmpty && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
-    public async Task ValidateFirstAsync_InvalidUser_ReturnsFirstErrorOnly()
+    public async Task ShortName_DefaultContext_FailsMinLength()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User { Name = "", Email = "bad", Age = 200 };
-            var report = await provider.ValidateFirstAsync(user, ct: TestContext.Current.CancellationToken);
+            Name = "Al",
+            Email = "alice@example.com"
+        };
 
-            Assert.False(report.IsSuccess);
-            Assert.Single(report.Errors!);
-        }
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.MinLength && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
-    public async Task Context_Default_UsesDefaultValidator()
+    public async Task InvalidEmail_Fails()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User { Name = "Jo", Email = "j@m.co", Age = 25 };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
-            Assert.True(report.IsSuccess);
-        }
+            Name = "Alice",
+            Email = "notanemail"
+        };
+
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.InvalidEmail);
     }
 
     [Fact]
-    public async Task Context_Create_UsesCreateValidator()
+    public async Task PremiumUser_NoCompany_Fails()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User { Name = "Jo" };
-            var report = await provider.ValidateAllAsync(user, "Create", TestContext.Current.CancellationToken);
-            Assert.False(report.IsSuccess);
-            Assert.Equal(ValidationCode.MinLength, report.Status);
-        }
+            Name = "Alice",
+            Email = "alice@example.com",
+            IsPremium = true,
+            CompanyName = null
+        };
+
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.PropertyName == nameof(User.CompanyName));
     }
 
     [Fact]
-    public async Task When_ConditionFalse_SkipsRules()
+    public async Task NonPremiumUser_NoCompany_Passes()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User
-            {
-                Name = "John", Email = "j@m.co", Age = 25,
-                HasPhone = false, Phone = null
-            };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
-            Assert.True(report.IsSuccess);
-        }
+            Name = "Alice",
+            Email = "alice@example.com",
+            IsPremium = false,
+            CompanyName = null
+        };
+
+        var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
+        Assert.True(report.IsSuccess);
     }
 
     [Fact]
-    public async Task When_ConditionTrue_AppliesRules()
+    public async Task StrictContext_EnforcesStricterRules()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
-        {
-            var user = new User
-            {
-                Name = "John", Email = "j@m.co", Age = 25,
-                HasPhone = true, Phone = null
-            };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
-            Assert.False(report.IsSuccess);
-            Assert.Contains(report.Errors!, e => e.PropertyName == nameof(User.Phone));
-        }
+        var user = new User { Name = "Bob" }; // 3 chars, OK for Default, fail for Strict (min 5)
+
+        var report = await _provider.ValidateAsync(user, context: "Strict",
+            ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.MinLength && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
-    public async Task When_ConditionTrue_InvalidFormat()
+    public async Task BreakOnFirst_ReturnsSingleError()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        var user = new User
         {
-            var user = new User
-            {
-                Name = "John", Email = "j@m.co", Age = 25,
-                HasPhone = true, Phone = "12345"
-            };
-            var report = await provider.ValidateAllAsync(user, ct: TestContext.Current.CancellationToken);
-            Assert.Contains(report.Errors!, e =>
-                e.PropertyName == nameof(User.Phone) &&
-                e.Code == ValidationCode.InvalidFormat);
-        }
+            Name = "",
+            Email = ""
+        };
+
+        var report = await _provider.ValidateAsync(user, breakOnFirst: true,
+            ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Single(report.Errors!);
     }
 
     [Fact]
-    public async Task DynamicConstraint_ReadsConfigFromSp()
+    public async Task CollectAll_ReturnsMultipleErrors()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider(s =>
+        var user = new User
         {
-            s.AddSingleton<IAppConfig>((_) => new TestAppConfig
-            {
-                MinNameLength = 10,
-                MaxNameLength = 100
-            });
-        });
+            Name = "",
+            Email = ""
+        };
 
-        using (scope)
-        {
-            var user = new User { Name = "Short" };
-            var report = await provider.ValidateAllAsync(user, "Dynamic", TestContext.Current.CancellationToken);
-
-            Assert.False(report.IsSuccess);
-            Assert.Equal(ValidationCode.MinLength, report.Status);
-        }
+        var report = await _provider.ValidateAsync(user, breakOnFirst: false,
+            ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.True(report.Errors!.Count > 1);
     }
 
     [Fact]
-    public async Task DynamicConstraint_PassesWhenConfigAllows()
+    public void SyncWrapper_Works()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider(s =>
+        var user = new User
         {
-            s.AddSingleton<IAppConfig>((_) => new TestAppConfig
-            {
-                MinNameLength = 2,
-                MaxNameLength = 100
-            });
-        });
+            Name = "Alice",
+            Email = "alice@example.com"
+        };
 
-        using (scope)
-        {
-            var user = new User { Name = "Good" };
-            var report = await provider.ValidateAllAsync(user, "Dynamic", TestContext.Current.CancellationToken);
-            Assert.True(report.IsSuccess);
-        }
+        var report = _provider.Validate(user);
+        Assert.True(report.IsSuccess);
     }
 
     [Fact]
-    public async Task FluentValidator_IsSingleton_CompilesOnce()
+    public async Task OrderValidator_ValidOrder_Passes()
     {
-        var root = ProviderFactory.BuildServices();
-        
-        IFluentValidator<User> v1, v2;
+        var order = new Order { Id = 1, Amount = 99.99m, Status = "New" };
 
-        using (var scope = root.CreateScope())
-            v1 = scope.GetRequiredKeyedService<IAsyncValidator<User>>("Default")
-                as IFluentValidator<User> ?? throw new InvalidOperationException();
+        var report =
+            await _provider.ValidateAsync(order, ct: TestContext.Current.CancellationToken);
+        Assert.True(report.IsSuccess);
+    }
 
-        using (var scope = root.CreateScope())
-            v2 = scope.GetRequiredKeyedService<IAsyncValidator<User>>("Default")
-                as IFluentValidator<User> ?? throw new InvalidOperationException();
+    [Fact]
+    public async Task OrderValidator_ZeroId_Fails()
+    {
+        var order = new Order { Id = 0, Amount = 10m, Status = "New" };
 
-        Assert.Same(v1, v2);
+        var report =
+            await _provider.ValidateAsync(order, ct: TestContext.Current.CancellationToken);
+        Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.MustBePositive && e.PropertyName == nameof(Order.Id));
     }
 }

@@ -1,70 +1,44 @@
-﻿using Farewell.Abstractions.Extensions;
+﻿using Farewell.Abstractions.DI;
+using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
 
-public sealed class DirectValidatorTests
+public sealed class DirectValidatorTests : IDisposable
 {
-    [Fact]
-    public async Task DirectValidator_InjectsRepositoryFromDI()
+    private readonly IKeyedServiceProvider _scope;
+    private readonly IValidationProvider _provider;
+    private readonly InMemoryUserRepository _repo;
+
+    public DirectValidatorTests()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
+        _repo = new InMemoryUserRepository();
+        (_scope, _provider) = TestProviderFactory.Create(services =>
         {
-            var repo = scope.GetRequiredService<IRankRepository>();
-            repo.Seed("AdminName", "ADM");
+            services.AddSingleton<IUserRepository>(_ => _repo);
+        });
+    }
 
-            var rank = new Rank { Name = "AdminName", ShortName = "ADM" };
-            var report = await provider.ValidateAllAsync(rank, ct: TestContext.Current.CancellationToken);
+    public void Dispose() => _scope.Dispose();
 
-            Assert.False(report.IsSuccess);
-            Assert.Equal(2, report.Errors!.Count);
-            Assert.All(report.Errors!, e => Assert.Equal(ValidationCode.NotUnique, e.Code));
-        }
+    [Fact]
+    public async Task UniqueEmail_Passes()
+    {
+        var user = new User { Name = "Alice", Email = "alice@example.com" };
+        var report = await _provider.ValidateAsync(user, context: "Direct",
+            ct: TestContext.Current.CancellationToken);
+        Assert.True(report.IsSuccess);
     }
 
     [Fact]
-    public async Task DirectValidator_PassesWhenUnique()
+    public async Task DuplicateEmail_FailsNotUnique()
     {
-        var (scope, provider) = ProviderFactory.CreateProvider();
-        using (scope)
-        {
-            var rank = new Rank { Name = "NewRank", ShortName = "NEW" };
-            var report = await provider.ValidateAllAsync(rank, ct: TestContext.Current.CancellationToken);
-            Assert.True(report.IsSuccess);
-        }
-    }
-
-    [Fact]
-    public async Task DirectValidator_IsScoped_NewInstancePerScope()
-    {
-        var root = ProviderFactory.BuildServices();
-
-        IAsyncValidator<Rank> v1, v2;
-
-        using (var scope = root.CreateScope())
-            v1 = scope.GetRequiredKeyedService<IAsyncValidator<Rank>>("Default");
-
-        using (var scope = root.CreateScope())
-            v2 = scope.GetRequiredKeyedService<IAsyncValidator<Rank>>("Default");
-
-        Assert.NotSame(v1, v2);
-    }
-
-    [Fact]
-    public async Task DirectValidator_SharesRepositoryWithinScope()
-    {
-        var root = ProviderFactory.BuildServices();
-
-        using var scope = root.CreateScope();
-        var repo = scope.GetRequiredService<IRankRepository>();
-        repo.Seed("Shared", "SHR");
-
-        var provider = scope.GetRequiredService<IValidationProvider>();
-
-        var rank = new Rank { Name = "Shared", ShortName = "SHR" };
-        var report = await provider.ValidateAllAsync(rank, ct: TestContext.Current.CancellationToken);
-        
+        _repo.Add("taken@example.com");
+        var user = new User { Name = "Bob", Email = "taken@example.com" };
+        var report = await _provider.ValidateAsync(user, context: "Direct",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
+        Assert.Contains(report.Errors!, e =>
+            e.Code == ValidationCode.NotUnique && e.PropertyName == nameof(User.Email));
     }
 }

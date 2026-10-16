@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using Farewell.Abstractions.Validation;
 
-namespace Farewell.Validation.Extensions;
+namespace Farewell.Validation;
 
 public static class ValidationPresenterExtensions
 {

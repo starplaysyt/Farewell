@@ -1,20 +1,15 @@
-namespace Farewell.Abstractions.Validation;
+﻿namespace Farewell.Abstractions.Validation;
 
 public interface IValidationProvider
 {
     ValueTask<ValidationReport> ValidateAsync<T>(
         T instance,
-        IValidationCollector collector,
         string context = "Default",
+        bool breakOnFirst = false,
         CancellationToken ct = default);
 
-    ValueTask<ValidationReport> ValidateAllAsync<T>(
+    ValidationReport Validate<T>(
         T instance,
         string context = "Default",
-        CancellationToken ct = default);
-
-    ValueTask<ValidationReport> ValidateFirstAsync<T>(
-        T instance,
-        string context = "Default",
-        CancellationToken ct = default);
+        bool breakOnFirst = false);
 }

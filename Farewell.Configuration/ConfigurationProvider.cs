@@ -52,7 +52,7 @@ internal sealed class ConfigurationProvider<T> : IConfigurationProvider<T>
 
         if (_validationProvider == null) return resolved;
 
-        var validationReport = _validationProvider.ValidateAllAsync(resolved).AsTask()
+        var validationReport = _validationProvider.ValidateAsync(resolved).AsTask()
             .ConfigureAwait(false).GetAwaiter().GetResult();
 
         return validationReport.IsSuccess

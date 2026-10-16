@@ -1,4 +1,4 @@
-namespace Farewell.Abstractions.Validation;
+﻿namespace Farewell.Abstractions.Validation;
 
 public sealed class ValidationStatus(ValidationCode code, string propertyName)
 {

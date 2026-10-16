@@ -1,161 +1,129 @@
+using System.Reflection;
 using Farewell.Abstractions.Attributes.Validation;
 using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
 using Farewell.DI;
 using Farewell.Validation;
-using Farewell.Validation.Extensions;
 
 namespace Farewell.Debug.Tests.Validation;
 
-public class User
+public sealed class User
 {
-    public string? Name { get; set; }
+    public string Name { get; set; } = "";
     public string? Email { get; set; }
     public int Age { get; set; }
-    public string? Phone { get; set; }
-    public bool HasPhone { get; set; }
+    public bool IsPremium { get; set; }
+    public string? CompanyName { get; set; }
+    public decimal Salary { get; set; }
 }
 
-public class Rank
+public sealed class Order
 {
-    public string? Name { get; set; }
-    public string? ShortName { get; set; }
+    public int Id { get; set; }
+    public decimal Amount { get; set; }
+    public string Status { get; set; } = "";
 }
 
-public class UnvalidatedEntity
+public interface IUserRepository
 {
-    public string? Something { get; set; }
+    ValueTask<bool> EmailExistsAsync(string email, CancellationToken ct);
 }
 
-public interface IAppConfig
+public sealed class InMemoryUserRepository : IUserRepository
 {
-    int MinNameLength { get; }
-    int MaxNameLength { get; }
+    private readonly HashSet<string> _emails = new(StringComparer.OrdinalIgnoreCase);
+
+    public void Add(string email) => _emails.Add(email);
+
+    public ValueTask<bool> EmailExistsAsync(string email, CancellationToken ct)
+        => new(_emails.Contains(email));
 }
 
-public sealed class TestAppConfig : IAppConfig
-{
-    public int MinNameLength { get; set; } = 2;
-    public int MaxNameLength { get; set; } = 50;
-}
-
-public interface IRankRepository
-{
-    Task<bool> ExistsByNameAsync(string? name, CancellationToken ct);
-    Task<bool> ExistsByShortNameAsync(string? shortName, CancellationToken ct);
-    void Seed(string name, string shortName);
-}
-
-public sealed class InMemoryRankRepository : IRankRepository
-{
-    private readonly HashSet<string> _names = new();
-    private readonly HashSet<string> _shortNames = new();
-
-    public Task<bool> ExistsByNameAsync(string? name, CancellationToken ct)
-        => Task.FromResult(name is not null && _names.Contains(name));
-
-    public Task<bool> ExistsByShortNameAsync(string? shortName, CancellationToken ct)
-        => Task.FromResult(shortName is not null && _shortNames.Contains(shortName));
-
-    public void Seed(string name, string shortName)
-    {
-        _names.Add(name);
-        _shortNames.Add(shortName);
-    }
-}
-
+[ValidationContext("Default")]
 public sealed class UserValidator : FluentValidator<User>
 {
-    protected override void DefineRules(PropertiesValidatorBuilder<User> builder)
+    protected override void DefineRules(IConstraintBuilder<User> b)
     {
-        builder.Rule(u => u.Name)
+        b.Property(x => x.Name)
             .NotEmpty()
-            .Length(2, 50);
+            .MinLength(3)
+            .MaxLength(50);
 
-        builder.Rule(u => u.Email)
+        b.Property(x => x.Email)
             .NotEmpty()
-            .Matches(@"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+            .Email();
 
-        builder.Rule(u => u.Age)
-            .InRange(0, 150);
+        b.Property(x => x.Age, x => x.Age > 0)
+            .InRange(1, 150);
 
-        builder.Rule(u => u.Phone)
-            .When(u => u.HasPhone, r => r
-                .NotEmpty()
-                .Matches(@"^\+7\d{10}$"));
+        b.Property(x => x.CompanyName, x => x.IsPremium)
+            .NotEmpty()
+            .MinLength(2);
     }
 }
 
-[ValidationContext("Create")]
-public sealed class UserCreateValidator : FluentValidator<User>
+[ValidationContext("Strict")]
+public sealed class StrictUserValidator : FluentValidator<User>
 {
-    protected override void DefineRules(PropertiesValidatorBuilder<User> builder)
+    protected override void DefineRules(IConstraintBuilder<User> b)
     {
-        builder.Rule(u => u.Name)
+        b.Property(x => x.Name)
             .NotEmpty()
-            .MinLength(5);
+            .MinLength(5)
+            .MaxLength(30);
     }
 }
 
-public class UserDynamicValidator : FluentValidator<User>
+public sealed class OrderValidator : FluentValidator<Order>
 {
-    protected override void DefineRules(PropertiesValidatorBuilder<User> builder)
+    protected override void DefineRules(IConstraintBuilder<Order> b)
     {
-        builder.Rule(u => u.Name)
-            .NotEmpty()
-            .MinLength(sp => ServiceProviderExtensions.GetRequiredService<IAppConfig>(sp).MinNameLength)
-            .MaxLength(sp => ServiceProviderExtensions.GetRequiredService<IAppConfig>(sp).MaxNameLength);
+        b.Property(x => x.Id)
+            .Positive();
+
+        b.Property(x => x.Amount)
+            .Positive();
+
+        b.Property(x => x.Status)
+            .NotEmpty();
     }
 }
 
-[ValidationContext("Dynamic")]
-public sealed class UserDynamicValidatorKeyed : UserDynamicValidator { }
-
-public sealed class RankUniqueValidator(IRankRepository repository) : IDirectValidator<Rank>
+[ValidationContext("Direct")]
+public sealed class UserDirectValidator(IUserRepository repo) : IDirectValidator<User>
 {
     public async ValueTask<ValidationReport> ValidateAsync(
-        Rank instance,
-        IServiceProvider sp,
+        User instance,
+        IServiceProvider serviceProvider,
         IValidationCollector collector,
         CancellationToken ct = default)
     {
-        if (await repository.ExistsByNameAsync(instance.Name, ct).ConfigureAwait(false))
-            collector.Collect(ValidationStatus.Error(ValidationCode.NotUnique, nameof(Rank.Name)));
-
-        if (await repository.ExistsByShortNameAsync(instance.ShortName, ct).ConfigureAwait(false))
-            collector.Collect(ValidationStatus.Error(ValidationCode.NotUnique, nameof(Rank.ShortName)));
+        if (instance.Email is not null)
+        {
+            var exists = await repo.EmailExistsAsync(instance.Email, ct);
+            if (exists)
+                collector.Collect(
+                    ValidationStatus.Error(ValidationCode.NotUnique, nameof(User.Email)));
+        }
 
         return collector.ToReport();
     }
 }
 
-public static class ProviderFactory
+public static class TestProviderFactory
 {
-    public static IScopeProvider BuildServices(Action<ServiceBuilder>? configure = null)
-    {
-        var services = new ServiceBuilder();
-
-        services.AddValidation();
-        
-        services.AddValidator<UserValidator>();
-        services.AddValidator<UserCreateValidator>("Create");
-        services.AddValidator<UserDynamicValidatorKeyed>("Dynamic");
-        services.AddValidator<RankUniqueValidator>();
-        
-        services.AddSingleton<IAppConfig, TestAppConfig>();
-        services.AddScoped<IRankRepository, InMemoryRankRepository>();
-
-        configure?.Invoke(services);
-
-        return services.Build();
-    }
-    
-    public static (IKeyedServiceProvider scope, IValidationProvider provider) CreateProvider(
+    public static (IKeyedServiceProvider scope, IValidationProvider provider) Create(
         Action<IServiceBuilder>? configure = null)
     {
-        var root = BuildServices(configure);
-        var scope = root.CreateScope();
+        var services = new ServiceBuilder();
+        services.AddValidation();
+        services.AddValidators(Assembly.GetExecutingAssembly(), true);
+        services.AddScoped<IUserRepository, InMemoryUserRepository>();
+        configure?.Invoke(services);
+
+        var sp = services.Build();
+        var scope = sp.CreateScope();
         var provider = scope.GetRequiredService<IValidationProvider>();
         return (scope, provider);
     }

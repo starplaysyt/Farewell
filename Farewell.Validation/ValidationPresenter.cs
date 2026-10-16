@@ -2,17 +2,12 @@
 
 namespace Farewell.Validation;
 
-public sealed class ValidationPresenter : IValidationPresenter
+public sealed class ValidationPresenter(IValidationMessageResolver resolver) : IValidationPresenter
 {
-    private readonly IValidationMessageResolver _resolver;
-
-    public ValidationPresenter(IValidationMessageResolver resolver)
-        => _resolver = resolver;
-
     public string Format(ValidationStatus status)
     {
         if (status.IsSuccess) return string.Empty;
-        return _resolver.Resolve(status.Code, status.PropertyName);
+        return resolver.Resolve(status.Code, status.PropertyName);
     }
 
     public IReadOnlyList<string> Format(ValidationReport report)
