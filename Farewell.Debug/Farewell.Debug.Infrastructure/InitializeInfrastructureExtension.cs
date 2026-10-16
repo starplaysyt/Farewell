@@ -15,7 +15,7 @@ public static class InitializeInfrastructureExtension
 {
     public static IServiceBuilder AddInfrastructure(this IServiceBuilder builder)
     {
-        builder.AddCQRSHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)));
+        builder.AddCQRSHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)), true);
         builder.AddMediator();
 
         builder.AddDefaultDbContext<DefaultDbContext>(options => 

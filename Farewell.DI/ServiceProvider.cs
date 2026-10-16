@@ -200,9 +200,12 @@ public sealed class ServiceProvider : IScopeProvider
             var genericDef = type.GetGenericTypeDefinition();
             var descriptor = _openGenericDescriptors
                 .FirstOrDefault(d => d.ServiceType == genericDef);
-
+            
+            // CHANGED: This happens when we are trying to resolve generic service, but this service
+            // IS NOT open generic service, and IS NOT registered directly.
             if (descriptor?.ImplementationType is null)
-                return null!;
+                throw new InvalidOperationException(
+                    $"Unable to resolve service {closedType}, service not found.");
 
             var closedImpl = descriptor.ImplementationType
                 .MakeGenericType(type.GetGenericArguments());

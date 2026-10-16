@@ -8,6 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Farewell.DI\Farewell.DI.csproj" />
       <ProjectReference Include="..\Farewell.Debug.Infrastructure\Farewell.Debug.Infrastructure.csproj" />
     </ItemGroup>
 
