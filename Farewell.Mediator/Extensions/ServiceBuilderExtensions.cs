@@ -25,13 +25,15 @@ public static class ServiceBuilderExtensions
             .Select(t => new { t, t.BaseType })
             .Where(x => x.BaseType is not null && x.BaseType.IsGenericType &&
                         (x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<,>) ||
-                         x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<>)));
+                         x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<>))).ToArray();
 
         foreach (var binding in handlerTypes)
         {
             if (doLog) Console.WriteLine($"[ AddMediatorHandlers ] Adding service {binding.BaseType!.FullName} with implementation {binding.t.FullName}.");
             builder.AddScoped(binding.BaseType!, binding.t);
         }
+
+        Console.WriteLine($"[ AddMediatorHandlers ] Added {handlerTypes.Length} handlers as mediator handlers.");
         return builder;
     }
     
