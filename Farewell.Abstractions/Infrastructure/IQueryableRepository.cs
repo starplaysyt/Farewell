@@ -11,6 +11,8 @@ public interface IQueryableRepository<TEntity>
     // Bulk update with different update maps - unsupported by EntityFramework -
     // maybe extension in future
     // AsSplitQuery - useless without Include - no Include, no need in AsSplitQuery
+    
+    public IRepositoryUsagesAnalyzer<TEntity> UsagesAnalyzer { get; }
 
     public IUnitOfWork GetUnitOfWork();
     

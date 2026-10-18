@@ -12,6 +12,7 @@ public sealed class InMemoryQueryableRepository<TEntity> : IQueryableRepository<
     public void Seed(params TEntity[] entities) => _store.AddRange(entities);
 
     public IQueryable<TEntity> GetQuery() => _store.AsQueryable();
+    public IRepositoryUsagesAnalyzer<TEntity> UsagesAnalyzer => throw new NotImplementedException();
 
     public Task<bool> AnyAsync<TResult>(IQueryable<TResult> query, CancellationToken ct = default)
         => Task.FromResult(query.Any());

@@ -16,6 +16,8 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
     public DbContext Context { get; }
     public DbSet<TEntity> DbSet { get; }
 
+    public IRepositoryUsagesAnalyzer<TEntity> UsagesAnalyzer { get; }
+
     public EFRepository(TContext context)
     {
         Context = context ?? throw new InvalidOperationException("Given TContext is null.");
@@ -24,6 +26,8 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
         if (DbSet is null)
             throw new InvalidOperationException(
                 $"Unable to get DbSet for given entity {typeof(TEntity).FullName} from context {typeof(TContext).FullName}");
+        
+        UsagesAnalyzer = new EFRepositoryUsagesAnalyzer<TEntity, TContext>(this);
     }
 
     public IUnitOfWork GetUnitOfWork() => new EFUnitOfWork(Context);
@@ -181,7 +185,8 @@ public class EFRepository<TEntity, TContext> : IQueryableRepository<TEntity>
         var result = 0;
         if (UpdateMapHasChangesChecker<TUpdateMap>.Compiled.Invoke(updateMap))
             result = await query.ExecuteUpdateAsync(
-                UpdateSetterGenerator<TEntity, TUpdateMap>.Compiled.Invoke(updateMap), ct).ConfigureAwait(false);
+                    UpdateSetterGenerator<TEntity, TUpdateMap>.Compiled.Invoke(updateMap), ct)
+                .ConfigureAwait(false);
         return result;
     }
 

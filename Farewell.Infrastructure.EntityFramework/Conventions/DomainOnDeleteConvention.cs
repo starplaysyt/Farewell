@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using Farewell.Abstractions.Attributes.Domain;
 using Farewell.Abstractions.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;

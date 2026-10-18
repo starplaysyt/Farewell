@@ -1,4 +1,4 @@
-﻿namespace Farewell.Abstractions.Domain;
+﻿namespace Farewell.Abstractions.Attributes.Domain;
 
 [AttributeUsage(AttributeTargets.Class)]
 public sealed class OnDeleteAttribute(OnDeleteBehavior behavior) : Attribute

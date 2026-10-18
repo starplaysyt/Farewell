@@ -45,6 +45,10 @@ public static class ServiceBuilderRepositoryExtensions
         var efRepositoryType = typeof(EFRepository<,>);
         var contextType = typeof(TContext);
 
+        if (foundEntities.Length == 0)
+            Console.WriteLine(
+                $"[ AddAutoRepositories ] WARNING! No entities found in assembly {assembly.GetName().Name} in {@namespace} namespace.");
+
         foreach (var entityType in foundEntities)
         {
             var genericEntityType = queryableType.MakeGenericType(entityType);
@@ -53,9 +57,13 @@ public static class ServiceBuilderRepositoryExtensions
             builder.AddScoped(genericEntityType, genericRepoType);
 
             if (logAdded)
-                Console.WriteLine("[AddAutoRepositories] Adding Repository {0}<{1}> of type {2}<{3}, {4}>",
-                    genericEntityType.Name, entityType.Name, efRepositoryType.Name, entityType.Name, contextType.Name);
+                Console.WriteLine(
+                    "[AddAutoRepositories] Adding Repository {0}<{1}> of type {2}<{3}, {4}>",
+                    genericEntityType.Name, entityType.Name, efRepositoryType.Name, entityType.Name,
+                    contextType.Name);
         }
+
+        Console.WriteLine($"[ AddAutoRepositories ] Added {foundEntities.Length} repositories for {typeof(TContext)} context.");
 
         return builder;
     }

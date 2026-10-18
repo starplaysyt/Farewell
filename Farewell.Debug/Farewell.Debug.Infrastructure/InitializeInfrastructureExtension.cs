@@ -17,7 +17,7 @@ public static class InitializeInfrastructureExtension
     public static IServiceBuilder AddInfrastructure(this IServiceBuilder builder)
     {
         builder.AddMediator();
-        builder.AddMediatorHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)), true);
+        builder.AddMediatorHandlers(Assembly.GetAssembly(typeof(IApplicationMarker)));
 
         builder.AddDefaultDbContext<DefaultDbContext>(options => 
             options.UseAutoConfigurations()
@@ -31,6 +31,14 @@ public static class InitializeInfrastructureExtension
                 .UseSqlite("Data Source=other.db"));
         builder.AddCreateOrMigrateRule<OtherDbContext>();
 
+        builder.AddDbContext<RepositoryUsageTestDbContext>(options =>
+            options.UseAutoConfigurations()
+                .UseDomainConventions()
+                .UseSqlite("Data Source=repousagedb.db"));
+        builder.AddCreateOrMigrateRule<RepositoryUsageTestDbContext>();
+
+        builder.AddAutoRepositories<RepositoryUsageTestDbContext>(Assembly.GetAssembly(typeof(IDomainMarker))!,
+            "Farewell.Debug.Domain.Entities.RepositoryUsageTestEntities", true);
         builder.AddAutoRepositories<DbContext>(Assembly.GetAssembly(typeof(IDomainMarker))!, 
             @namespace: "Farewell.Debug.Domain.Entities.Customers", true);
         builder.AddAutoRepositories<OtherDbContext>(Assembly.GetAssembly(typeof(IDomainMarker))!, 
