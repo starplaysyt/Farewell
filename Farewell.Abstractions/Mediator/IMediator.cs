@@ -1,4 +1,6 @@
-﻿namespace Farewell.Abstractions.Mediator;
+﻿using Farewell.Abstractions.General;
+
+namespace Farewell.Abstractions.Mediator;
 
 public interface IMediator
 {

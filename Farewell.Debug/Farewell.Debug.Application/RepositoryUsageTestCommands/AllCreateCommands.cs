@@ -1,4 +1,5 @@
-﻿using Farewell.Abstractions.Infrastructure;
+﻿using Farewell.Abstractions.General;
+using Farewell.Abstractions.Infrastructure;
 using Farewell.Abstractions.Mediator;
 using Farewell.Debug.Domain.Entities.RepositoryUsageTestEntities;
 

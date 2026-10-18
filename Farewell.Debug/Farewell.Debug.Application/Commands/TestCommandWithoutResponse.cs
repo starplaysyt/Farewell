@@ -1,4 +1,5 @@
-﻿using Farewell.Abstractions.Mediator;
+﻿using Farewell.Abstractions.General;
+using Farewell.Abstractions.Mediator;
 
 namespace Farewell.Debug.Application.Commands;
 

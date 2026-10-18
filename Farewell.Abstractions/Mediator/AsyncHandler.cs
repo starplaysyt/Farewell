@@ -1,3 +1,5 @@
+using Farewell.Abstractions.General;
+
 namespace Farewell.Abstractions.Mediator;
 
 public abstract class AsyncHandler<TRequest, TResult>

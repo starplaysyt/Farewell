@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Mediator;
 using Farewell.Abstractions.Infrastructure;
 using Farewell.Debug.Domain.Entities.Company;
