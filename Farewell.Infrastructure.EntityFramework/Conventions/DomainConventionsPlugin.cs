@@ -10,6 +10,9 @@ public sealed class DomainConventionsPlugin : IConventionSetPlugin
         conventionSet.ModelFinalizingConventions
             .Add(new DomainIdentityConvention());
 
+        conventionSet.ModelFinalizingConventions
+            .Add(new DomainOnDeleteConvention());
+
         return conventionSet;
     }
 }
