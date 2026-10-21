@@ -26,6 +26,7 @@
       <ProjectReference Include="..\..\Farewell.Localization\Farewell.Localization.csproj" />
       <ProjectReference Include="..\..\Farewell.Logging\Farewell.Logging.csproj" />
       <ProjectReference Include="..\..\Farewell.Mapping\Farewell.Mapping.csproj" />
+      <ProjectReference Include="..\..\Farewell.Presentation\Farewell.Presentation.csproj" />
       <ProjectReference Include="..\..\Farewell.StateRules\Farewell.StateRules.csproj" />
       <ProjectReference Include="..\..\Farewell.Validation\Farewell.Validation.csproj" />
     </ItemGroup>
