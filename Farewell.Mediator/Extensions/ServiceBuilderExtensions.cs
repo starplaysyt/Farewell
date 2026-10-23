@@ -25,7 +25,8 @@ public static class ServiceBuilderExtensions
             .Select(t => new { t, t.BaseType })
             .Where(x => x.BaseType is not null && x.BaseType.IsGenericType &&
                         (x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<,>) ||
-                         x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<>))).ToArray();
+                         x.BaseType.GetGenericTypeDefinition() == typeof(AsyncHandler<>) ||
+                         x.BaseType.GetGenericTypeDefinition() == typeof(ValidationAsyncHandler<>))).ToArray();
 
         foreach (var binding in handlerTypes)
         {
