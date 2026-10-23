@@ -2,6 +2,7 @@ using System.Reflection;
 using Farewell.Abstractions.Attributes.Validation;
 using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Validation;
 using Farewell.DI;
 using Farewell.Validation;
@@ -104,7 +105,7 @@ public sealed class UserDirectValidator(IUserRepository repo) : IDirectValidator
             var exists = await repo.EmailExistsAsync(instance.Email, ct);
             if (exists)
                 collector.Collect(
-                    ValidationStatus.Error(ValidationCode.NotUnique, nameof(User.Email)));
+                    ValidationStatus.Error(ResultCode.Conflict, nameof(User.Email)));
         }
 
         return collector.ToReport();

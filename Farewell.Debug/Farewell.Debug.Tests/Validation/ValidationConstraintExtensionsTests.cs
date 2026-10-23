@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Validation;
 using Farewell.DI;
 using Farewell.Validation.Internal;
@@ -29,7 +30,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.NotEmpty());
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.NotEmpty, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationNotEmpty, report.Errors![0].Code);
     }
 
     [Fact]
@@ -60,7 +61,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.MinLength(3));
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.MinLength, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationMinLength, report.Errors![0].Code);
     }
 
     [Fact]
@@ -109,7 +110,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.MaxLength(5));
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.MaxLength, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationMaxLength, report.Errors![0].Code);
     }
 
     [Fact]
@@ -130,7 +131,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.Email());
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.InvalidEmail, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationInvalidEmail, report.Errors![0].Code);
     }
 
     [Fact]
@@ -151,7 +152,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.Positive());
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.MustBePositive, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationMustBePositive, report.Errors![0].Code);
     }
 
     [Fact]
@@ -172,7 +173,7 @@ public sealed class ValidationConstraintExtensionsTests
             b => b.InRange(0, 150));
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.OutOfRange, report.Errors![0].Code);
+        Assert.Equal(ResultCode.ValidationOutOfRange, report.Errors![0].Code);
     }
 
     [Fact]
@@ -200,7 +201,7 @@ public sealed class ValidationConstraintExtensionsTests
     {
         var report = await ValidateSingle<User, string?>(
             new User { Name = "" }, x => x.Name,
-            b => b.AddCheck(ValidationCode.NotEmpty, v => !string.IsNullOrEmpty(v)));
+            b => b.AddCheck(ResultCode.ValidationNotEmpty, v => !string.IsNullOrEmpty(v)));
 
         Assert.False(report.IsSuccess);
     }
@@ -210,7 +211,7 @@ public sealed class ValidationConstraintExtensionsTests
     {
         var report = await ValidateSingle<User, string?>(
             new User { Name = "ok" }, x => x.Name,
-            b => b.AddCheck(ValidationCode.NotEmpty, (v, _) => !string.IsNullOrEmpty(v)));
+            b => b.AddCheck(ResultCode.ValidationNotEmpty, (v, _) => !string.IsNullOrEmpty(v)));
 
         Assert.True(report.IsSuccess);
     }
@@ -220,7 +221,7 @@ public sealed class ValidationConstraintExtensionsTests
     {
         var report = await ValidateSingle<User, string?>(
             new User { Name = "ok" }, x => x.Name,
-            b => b.AddCheck(ValidationCode.NotEmpty,
+            b => b.AddCheck(ResultCode.ValidationNotEmpty,
                 (v, _, _) => new ValueTask<bool>(!string.IsNullOrEmpty(v))));
 
         Assert.True(report.IsSuccess);

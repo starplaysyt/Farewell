@@ -1,16 +1,18 @@
-﻿namespace Farewell.Abstractions.Validation;
+﻿using Farewell.Abstractions.General;
+
+namespace Farewell.Abstractions.Validation;
 
 public sealed class ValidationReport(ValidationStatus[]? errors)
 {
     public static readonly ValidationReport Ok = new(null);
 
-    public ValidationCode Status { get; } = errors?.Length switch
+    public ResultCode Status { get; } = errors?.Length switch
     {
-        null or 0 => ValidationCode.Ok,
+        null or 0 => ResultCode.Ok,
         1 => errors[0].Code,
-        _ => ValidationCode.MultipleErrors
+        _ => ResultCode.ValidationMultipleErrors
     };
 
     public IReadOnlyList<ValidationStatus>? Errors { get; } = errors;
-    public bool IsSuccess => Status == ValidationCode.Ok;
+    public bool IsSuccess => Status == ResultCode.Ok;
 }

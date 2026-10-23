@@ -1,4 +1,5 @@
-﻿using Farewell.Abstractions.Validation;
+﻿using Farewell.Abstractions.General;
+using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
 
@@ -11,9 +12,9 @@ public class ValidationCollectorsTests
 
         Assert.True(collector.Collect(ValidationStatus.Ok));
         Assert.True(collector.Collect(
-            ValidationStatus.Error(ValidationCode.NotEmpty, "Name")));
+            ValidationStatus.Error(ResultCode.ValidationNotEmpty, "Name")));
         Assert.True(collector.Collect(
-            ValidationStatus.Error(ValidationCode.MinLength, "Email")));
+            ValidationStatus.Error(ResultCode.ValidationMinLength, "Email")));
 
         var report = collector.ToReport();
         Assert.False(report.IsSuccess);
@@ -36,12 +37,12 @@ public class ValidationCollectorsTests
 
         Assert.True(collector.Collect(ValidationStatus.Ok));
         Assert.False(collector.Collect(
-            ValidationStatus.Error(ValidationCode.NotEmpty, "Name")));
+            ValidationStatus.Error(ResultCode.ValidationNotEmpty, "Name")));
 
         var report = collector.ToReport();
         Assert.False(report.IsSuccess);
         Assert.Single(report.Errors!);
-        Assert.Equal(ValidationCode.NotEmpty, report.Errors[0].Code);
+        Assert.Equal(ResultCode.ValidationNotEmpty, report.Errors[0].Code);
     }
 
     [Fact]

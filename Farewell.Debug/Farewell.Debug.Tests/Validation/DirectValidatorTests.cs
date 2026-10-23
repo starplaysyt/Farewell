@@ -1,5 +1,6 @@
 ﻿using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
@@ -39,6 +40,6 @@ public sealed class DirectValidatorTests : IDisposable
             ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.NotUnique && e.PropertyName == nameof(User.Email));
+            e.Code == ResultCode.Conflict && e.PropertyName == nameof(User.Email));
     }
 }

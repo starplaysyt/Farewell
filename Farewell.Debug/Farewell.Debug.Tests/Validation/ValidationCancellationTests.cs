@@ -1,4 +1,5 @@
-﻿using Farewell.Abstractions.Validation;
+﻿using Farewell.Abstractions.General;
+using Farewell.Abstractions.Validation;
 using Farewell.DI;
 using Farewell.Validation.Internal;
 
@@ -11,7 +12,7 @@ public sealed class ValidationCancellationTests
     {
         var builder = new ConstraintBuilder<User>();
         builder.Property(x => x.Name)
-            .AddCheck(ValidationCode.NotEmpty, async (v, _, ct) =>
+            .AddCheck(ResultCode.ValidationNotEmpty, async (v, _, ct) =>
             {
                 await Task.Delay(5000, ct);
                 return !string.IsNullOrEmpty(v);

@@ -20,28 +20,6 @@ public sealed class ValidationDIRegistrationTests
     }
 
     [Fact]
-    public void AddValidation_RegistersPresenter()
-    {
-        var services = new ServiceBuilder();
-        services.AddValidation();
-        var sp = services.Build();
-
-        var presenter = sp.GetService<IValidationPresenter>();
-        Assert.NotNull(presenter);
-    }
-
-    [Fact]
-    public void AddValidation_RegistersResolver()
-    {
-        var services = new ServiceBuilder();
-        services.AddValidation();
-        var sp = services.Build();
-
-        var resolver = sp.GetService<IValidationMessageResolver>();
-        Assert.NotNull(resolver);
-    }
-
-    [Fact]
     public void AddValidators_RegistersDefaultContext()
     {
         var services = new ServiceBuilder();

@@ -1,12 +1,12 @@
-﻿using Farewell.Abstractions.Validation;
+﻿using Farewell.Abstractions.General;
 
 namespace Farewell.Validation.Internal;
 
 internal readonly struct CheckEntry<TValue>(
-    ValidationCode code,
+    ResultCode code,
     Func<TValue, IServiceProvider, CancellationToken, ValueTask<bool>> check)
 {
-    public ValidationCode Code { get; } = code;
+    public ResultCode Code { get; } = code;
 
     public Func<TValue, IServiceProvider, CancellationToken, ValueTask<bool>> Check { get; } =
         check;

@@ -1,4 +1,5 @@
 ﻿using Farewell.Abstractions.DI;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
@@ -41,7 +42,7 @@ public sealed class FluentValidatorTests : IDisposable
         var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.NotEmpty && e.PropertyName == nameof(User.Name));
+            e.Code == ResultCode.ValidationNotEmpty && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
@@ -56,7 +57,7 @@ public sealed class FluentValidatorTests : IDisposable
         var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.MinLength && e.PropertyName == nameof(User.Name));
+            e.Code == ResultCode.ValidationMinLength && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
@@ -71,7 +72,7 @@ public sealed class FluentValidatorTests : IDisposable
         var report = await _provider.ValidateAsync(user, ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.InvalidEmail);
+            e.Code == ResultCode.ValidationInvalidEmail);
     }
 
     [Fact]
@@ -115,7 +116,7 @@ public sealed class FluentValidatorTests : IDisposable
             ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.MinLength && e.PropertyName == nameof(User.Name));
+            e.Code == ResultCode.ValidationMinLength && e.PropertyName == nameof(User.Name));
     }
 
     [Fact]
@@ -180,6 +181,6 @@ public sealed class FluentValidatorTests : IDisposable
             await _provider.ValidateAsync(order, ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.MustBePositive && e.PropertyName == nameof(Order.Id));
+            e.Code == ResultCode.ValidationMustBePositive && e.PropertyName == nameof(Order.Id));
     }
 }

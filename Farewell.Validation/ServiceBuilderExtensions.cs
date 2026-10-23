@@ -4,7 +4,6 @@ using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
 using Farewell.Validation.Internal;
-using Farewell.Validation.Presenters;
 
 namespace Farewell.Validation;
 
@@ -13,8 +12,6 @@ public static class ServiceBuilderExtensions
     public static IServiceBuilder AddValidation(this IServiceBuilder services)
     {
         services.AddScoped<IValidationProvider, ValidationProvider>();
-        services.AddSingleton<IValidationMessageResolver, DefaultValidationMessageResolver>();
-        services.AddSingleton<IValidationPresenter, DefaultValidationPresenter>();
         return services;
     }
 

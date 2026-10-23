@@ -1,5 +1,6 @@
 ﻿using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
+using Farewell.Abstractions.General;
 using Farewell.Abstractions.Infrastructure;
 using Farewell.Abstractions.Validation;
 using Farewell.Debug.Tests.Validation;
@@ -37,7 +38,8 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -56,10 +58,11 @@ public sealed class DbConstraintTests
             DepartmentId = 42
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.NotFound &&
+            e.Code == ResultCode.NotFound &&
             e.PropertyName == nameof(CreateUserCommand.DepartmentId));
     }
 
@@ -78,7 +81,8 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -99,7 +103,8 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         // Count == 1 for email, <= 1 passes
         Assert.True(report.IsSuccess);
     }
@@ -122,10 +127,11 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.NotUnique &&
+            e.Code == ResultCode.Conflict &&
             e.PropertyName == nameof(CreateUserCommand.Email));
     }
 
@@ -144,7 +150,8 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -164,10 +171,11 @@ public sealed class DbConstraintTests
             DepartmentId = 1
         };
 
-        var report = await provider.ValidateAsync(cmd, context: "DbCreate", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbCreate",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.Conflict &&
+            e.Code == ResultCode.Conflict &&
             e.PropertyName == nameof(CreateUserCommand.Username));
     }
 
@@ -183,7 +191,8 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new CreateOrderCommand { UserId = 10 };
-        var report = await provider.ValidateAsync(cmd, context: "DbOrder", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbOrder",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -198,13 +207,14 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new CreateOrderCommand { UserId = 10 };
-        var report = await provider.ValidateAsync(cmd, context: "DbOrder", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbOrder",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.OutOfRange &&
+            e.Code == ResultCode.ValidationOutOfRange &&
             e.PropertyName == nameof(CreateOrderCommand.UserId));
     }
-    
+
     [Fact]
     public async Task DbAny_AdminExists_Passes()
     {
@@ -214,7 +224,8 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new AssignRoleCommand { Role = "Editor", AccountId = 5 };
-        var report = await provider.ValidateAsync(cmd, context: "DbRole", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbRole",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -227,10 +238,11 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new AssignRoleCommand { Role = "Editor", AccountId = 5 };
-        var report = await provider.ValidateAsync(cmd, context: "DbRole", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbRole",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.NotFound &&
+            e.Code == ResultCode.NotFound &&
             e.PropertyName == nameof(AssignRoleCommand.Role));
     }
 
@@ -244,7 +256,8 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new AssignRoleCommand { Role = "Editor", AccountId = 5 };
-        var report = await provider.ValidateAsync(cmd, context: "DbRole", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbRole",
+            ct: TestContext.Current.CancellationToken);
         Assert.True(report.IsSuccess);
     }
 
@@ -258,10 +271,11 @@ public sealed class DbConstraintTests
         using var _ = scope;
 
         var cmd = new AssignRoleCommand { Role = "Editor", AccountId = 5 };
-        var report = await provider.ValidateAsync(cmd, context: "DbRole", ct: TestContext.Current.CancellationToken);
+        var report = await provider.ValidateAsync(cmd, context: "DbRole",
+            ct: TestContext.Current.CancellationToken);
         Assert.False(report.IsSuccess);
         Assert.Contains(report.Errors!, e =>
-            e.Code == ValidationCode.Conflict &&
+            e.Code == ResultCode.Conflict &&
             e.PropertyName == nameof(AssignRoleCommand.AccountId));
     }
 }

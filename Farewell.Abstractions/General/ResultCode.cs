@@ -1,31 +1,34 @@
 ﻿namespace Farewell.Abstractions.General;
 
 /// <summary>
-/// Custom codes are defined in area 0_000 - 0_999.
+/// Custom codes are defined in area 0_001 - 0_999.
 /// </summary>
 /// <param name="Code"></param>
-public record ResultCode(int Code)
+public record struct ResultCode(int Code)
 {
     public static implicit operator ResultCode(int x) => new(x);
     public static implicit operator int(ResultCode code) => code.Code;
-    
-    public static readonly ResultCode Ok = new(1_200);
+
+    public static readonly ResultCode Ok = new(0);
     public static readonly ResultCode NotFound = new(1_404);
     public static readonly ResultCode Conflict = new(1_409);
     public static readonly ResultCode Timeout = new(1_504);
     public static readonly ResultCode Forbidden = new(1_403);
-    
+
     // ♿♿♿ Invalidity team ♿♿♿
     public static readonly ResultCode InvalidReference = new(2_000);
+
     // current system state cannot handle that operation
-    public static readonly ResultCode InvalidState = new(2_001); 
+    public static readonly ResultCode InvalidState = new(2_001);
+
     // operation cannot be handled at all
-    public static readonly ResultCode InvalidOperation = new(2_002); 
+    public static readonly ResultCode InvalidOperation = new(2_002);
+
     // operation can be handled, but not with that request
-    public static readonly ResultCode InvalidRequest = new(2_003); 
-    public static readonly ResultCode InvalidBusiness = new(2_100); 
-    public static readonly ResultCode InvalidCustom = new(2_200); 
-    
+    public static readonly ResultCode InvalidRequest = new(2_003);
+    public static readonly ResultCode InvalidBusiness = new(2_100);
+    public static readonly ResultCode InvalidCustom = new(2_200);
+
     // Validation
     public static readonly ResultCode Validation = new(3_000);
     public static readonly ResultCode ValidationMultipleErrors = new(3_001);
@@ -41,7 +44,7 @@ public record ResultCode(int Code)
     public static readonly ResultCode ValidationOutOfRange = new(3_011);
     public static readonly ResultCode ValidationBusinessCheck = new(3_100);
     public static readonly ResultCode ValidationCustomCheck = new(3_200);
-    
+
     // Authorisation - can you do something
     public static readonly ResultCode Authorisation = new(4_000);
     public static readonly ResultCode AuthorityInsufficientRole = new(4_001);
@@ -58,7 +61,7 @@ public record ResultCode(int Code)
     public static readonly ResultCode AuthorityActionForbiddenInWorkflow = new(4_012);
     public static readonly ResultCode AuthorityBusiness = new(4_100);
     public static readonly ResultCode AuthorityCustom = new(4_200);
-    
+
     // Authentification - who are you
     public static readonly ResultCode Authentification = new(5_000);
     public static readonly ResultCode AuthCredentials = new(5_001);
@@ -89,7 +92,7 @@ public record ResultCode(int Code)
     public static readonly ResultCode FileDirectoryNotEmpty = new(6_014);
     public static readonly ResultCode FileBusiness = new(6_100);
     public static readonly ResultCode FileCustom = new(6_200);
-    
+
     // Business
     public static readonly ResultCode Business = new(7_000);
     public static readonly ResultCode BusinessStateTransition = new(7_001);

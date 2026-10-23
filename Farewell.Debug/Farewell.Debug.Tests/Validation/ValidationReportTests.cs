@@ -1,4 +1,5 @@
-﻿using Farewell.Abstractions.Validation;
+﻿using Farewell.Abstractions.General;
+using Farewell.Abstractions.Validation;
 
 namespace Farewell.Debug.Tests.Validation;
 
@@ -8,7 +9,7 @@ public sealed class ValidationReportTests
     public void Ok_IsSuccess_NoErrors()
     {
         Assert.True(ValidationReport.Ok.IsSuccess);
-        Assert.Equal(ValidationCode.Ok, ValidationReport.Ok.Status);
+        Assert.Equal(ResultCode.Ok, ValidationReport.Ok.Status);
         Assert.Null(ValidationReport.Ok.Errors);
     }
 
@@ -16,10 +17,10 @@ public sealed class ValidationReportTests
     public void SingleError_StatusIsThatCode()
     {
         var report = new ValidationReport(
-            [ValidationStatus.Error(ValidationCode.NotEmpty, "Name")]);
+            [ValidationStatus.Error(ResultCode.Conflict, "Name")]);
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.NotEmpty, report.Status);
+        Assert.Equal(ResultCode.Conflict, report.Status);
         Assert.Single(report.Errors!);
     }
 
@@ -28,12 +29,12 @@ public sealed class ValidationReportTests
     {
         var report = new ValidationReport(
         [
-            ValidationStatus.Error(ValidationCode.NotEmpty, "Name"),
-            ValidationStatus.Error(ValidationCode.MinLength, "Email")
+            ValidationStatus.Error(ResultCode.ValidationNotEmpty, "Name"),
+            ValidationStatus.Error(ResultCode.ValidationMinLength, "Email")
         ]);
 
         Assert.False(report.IsSuccess);
-        Assert.Equal(ValidationCode.MultipleErrors, report.Status);
+        Assert.Equal(ResultCode.ValidationMultipleErrors, report.Status);
         Assert.Equal(2, report.Errors!.Count);
     }
 
