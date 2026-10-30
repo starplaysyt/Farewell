@@ -1,9 +1,10 @@
+using Farewell.Abstractions.DI;
 using Farewell.Abstractions.Extensions;
 using Farewell.Abstractions.Validation;
 
 namespace Farewell.Validation;
 
-public sealed class ValidationProvider(IServiceProvider serviceProvider) : IValidationProvider
+public sealed class ValidationProvider(IKeyedServiceProvider serviceProvider) : IValidationProvider
 {
     public async ValueTask<ValidationReport> ValidateAsync<T>(
         T instance,

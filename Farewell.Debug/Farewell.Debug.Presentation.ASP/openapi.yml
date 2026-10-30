@@ -3,9 +3,9 @@ swagger: 2.0
 info:
   title: My Title
   version: 1.0.0
-host: localhost:5146
+host: localhost:7004
 schemes:
-- http
+- https
 paths:
   /api/workers/add:
     post:
@@ -34,6 +34,17 @@ paths:
           description: ''
           schema:
             $ref: '#/definitions/TestEndpointResponse'
+  /api/test/provider:
+    get:
+      operationId: FarewellDebugPresentationASPEndpointsTestingDataEndpointsTestProviderEndpoint
+      produces:
+      - application/json
+      responses:
+        200:
+          x-nullable: false
+          description: ''
+          schema:
+            $ref: '#/definitions/TestProviderEndpointResponse'
 definitions:
   AddNewWorkerRequest:
     type: object
@@ -51,4 +62,76 @@ definitions:
     - result
     properties:
       result:
+        type: string
+  TestProviderEndpointResponse:
+    type: object
+    required:
+    - mode
+    - message
+    - rootUnkeyed
+    - scope1Unkeyed
+    - scope2Unkeyed
+    - rootKeyed
+    - scope1Keyed
+    - scope2Keyed
+    properties:
+      mode:
+        type: string
+      message:
+        type: string
+      rootUnkeyed:
+        $ref: '#/definitions/UnkeyedCheck'
+      scope1Unkeyed:
+        $ref: '#/definitions/UnkeyedCheck'
+      scope2Unkeyed:
+        $ref: '#/definitions/UnkeyedCheck'
+      rootKeyed:
+        $ref: '#/definitions/KeyedCheck'
+      scope1Keyed:
+        $ref: '#/definitions/KeyedCheck'
+      scope2Keyed:
+        $ref: '#/definitions/KeyedCheck'
+  UnkeyedCheck:
+    type: object
+    required:
+    - singletonSameAsRoot
+    - scopedSameWithinScope
+    - transientDifferentEachResolve
+    properties:
+      singletonId:
+        type: string
+      scopedId:
+        type: string
+      transientId1:
+        type: string
+      transientId2:
+        type: string
+      singletonSameAsRoot:
+        type: boolean
+      scopedSameWithinScope:
+        type: boolean
+      transientDifferentEachResolve:
+        type: boolean
+  KeyedCheck:
+    type: object
+    required:
+    - singletonKeyedSameAsRoot
+    - scopedKeyedSameWithinScope
+    - transientKeyedDifferentEachResolve
+    properties:
+      singletonKeyedId:
+        type: string
+      scopedKeyedId:
+        type: string
+      transientKeyedId1:
+        type: string
+      transientKeyedId2:
+        type: string
+      singletonKeyedSameAsRoot:
+        type: boolean
+      scopedKeyedSameWithinScope:
+        type: boolean
+      transientKeyedDifferentEachResolve:
+        type: boolean
+      requiredKeyedTypeName:
         type: string

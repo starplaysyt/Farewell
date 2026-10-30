@@ -1,5 +1,6 @@
 using Farewell.Abstractions.DI;
 using Microsoft.Extensions.DependencyInjection;
+using IKeyedServiceProvider = Farewell.Abstractions.DI.IKeyedServiceProvider;
 
 namespace Farewell.Compatibility.MS.DependencyInjection;
 
@@ -38,6 +39,7 @@ public class FarewellBuilder(IServiceCollection collection) : IServiceBuilder
 
     public IScopeProvider Build()
     {
+        collection.AddScoped<IKeyedServiceProvider, FarewellServiceScope>();
         return new FarewellScopeProvider(collection.BuildServiceProvider());
     }
 }

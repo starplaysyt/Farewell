@@ -1,6 +1,8 @@
+using Farewell.Abstractions.DI;
 using Farewell.Compatibility.MS.DependencyInjection;
 using Farewell.Compatibility.MS.Logging;
 using Farewell.Debug.Infrastructure;
+using Farewell.Debug.Presentation.ASP.TestingServices;
 using FastEndpoints;
 using FastEndpoints.Swagger;
 using NSwag;
@@ -15,7 +17,13 @@ builder.Services.AddFastEndpoints()
     .AddSwaggerDocument();
 
 // That should add all needed services.
-new FarewellBuilder(builder.Services).AddInfrastructure();
+new FarewellBuilder(builder.Services).AddInfrastructure()
+    .AddService(typeof(IUnkeyedSingletonTest), typeof(UnkeyedSingletonTest), ServiceLifetimeType.Singleton)
+    .AddService(typeof(IUnkeyedScopedTest), typeof(UnkeyedScopedTest), ServiceLifetimeType.Scoped)
+    .AddService(typeof(IUnkeyedTransientTest), typeof(UnkeyedTransientTest), ServiceLifetimeType.Transient)
+    .AddService(typeof(IKeyedTest), sp => new KeyedTest("keyed-singleton"), ServiceLifetimeType.Singleton, "keyed-singleton")
+    .AddService(typeof(IKeyedTest), sp => new KeyedTest("keyed-scoped"), ServiceLifetimeType.Scoped, "keyed-scoped")
+    .AddService(typeof(IKeyedTest), sp => new KeyedTest("keyed-transient"), ServiceLifetimeType.Transient, "keyed-transient");;
 
 builder.Logging.ClearProviders();
 builder.Logging.AddForwardFarewellLogger();

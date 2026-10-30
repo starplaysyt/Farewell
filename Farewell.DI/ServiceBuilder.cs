@@ -58,6 +58,7 @@ public sealed class ServiceBuilder : IServiceBuilder
     public IScopeProvider Build()
     {
         // Adding provider to be accessed from any service
+        this.AddScoped<IKeyedServiceProvider>(sp => (IKeyedServiceProvider)sp);
         this.AddScoped<IServiceProvider>(sp => sp);
         this.AddSingleton<IScopeProvider>(sp => (IScopeProvider)sp);
         
