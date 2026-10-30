@@ -39,7 +39,6 @@ public class FarewellBuilder(IServiceCollection collection) : IServiceBuilder
 
     public IScopeProvider Build()
     {
-        collection.AddScoped<IKeyedServiceProvider, FarewellServiceScope>();
         return new FarewellScopeProvider(collection.BuildServiceProvider());
     }
 }
